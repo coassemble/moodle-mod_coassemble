@@ -1,0 +1,103 @@
+.path-mod-coassemble .coassemble-embed-shell {
+    position: relative;
+    width: 100%;
+    min-height: 70vh;
+    background: #f3f4f6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.path-mod-coassemble .coassemble-embed-shell--edit {
+    min-height: calc(100vh - 96px);
+    border-radius: 0;
+}
+
+/* Full-bleed learner player (embedded layout hides the Moodle chrome). */
+.path-mod-coassemble.pagelayout-embedded .coassemble-embed-shell--view {
+    min-height: 0;
+    border-radius: 0;
+}
+
+.path-mod-coassemble.pagelayout-embedded .coassemble-embed-shell--view .coassemble-embed-iframe {
+    height: calc(100vh - 52px);
+    min-height: 480px;
+}
+
+.path-mod-coassemble .coassemble-player-chrome {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.path-mod-coassemble .coassemble-player-chrome .coassemble-exit-authoring {
+    margin-right: auto;
+}
+
+.path-mod-coassemble.pagelayout-embedded #page-header,
+.path-mod-coassemble.pagelayout-embedded .navbar,
+.path-mod-coassemble.pagelayout-embedded #page-footer {
+    display: none;
+}
+
+.path-mod-coassemble .coassemble-embed-iframe {
+    display: block;
+    width: 100%;
+    height: calc(100vh - 120px);
+    min-height: 640px;
+    border: 0;
+    background: #fff;
+}
+
+.path-mod-coassemble .coassemble-embed-shell--edit .coassemble-embed-iframe {
+    height: calc(100vh - 96px);
+}
+
+.path-mod-coassemble .coassemble-flow-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.path-mod-coassemble .coassemble-teacher-actions {
+    margin-bottom: 0.75rem;
+}
+
+.path-mod-coassemble .coassemble-manage-actions .btn,
+.path-mod-coassemble .coassemble-manage-actions .singlebutton {
+    margin: 0 0.35rem 0.35rem 0;
+    display: inline-block;
+}
+
+.path-mod-coassemble .coassemble-authoring-chrome {
+    padding: 0.5rem 0.75rem;
+    background: #111827;
+}
+
+.path-mod-coassemble .coassemble-authoring-chrome .coassemble-exit-authoring {
+    color: #f9fafb;
+}
+
+.path-mod-coassemble .coassemble-session-status {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.path-mod-coassemble .coassemble-session-status:empty,
+.path-mod-coassemble .coassemble-session-status[hidden] {
+    display: none;
+}
+
+.path-mod-coassemble .coassemble-session-status--ready {
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.path-mod-coassemble .coassemble-session-status--error,
+.path-mod-coassemble .coassemble-session-status--expired {
+    background: #fef2f2;
+    color: #991b1b;
+}
