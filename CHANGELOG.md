@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1 — 2026-08-03
+
+### Docs
+- Reconciled `COMPATIBILITY.md` with the declared support range: it now states **Moodle 4.1 – 5.1** (matching `version.php` and `README.md`) with the CI-tested branches and the PostgreSQL 15 / MariaDB 10.11 minimums, replacing the earlier "4.1–4.5 supported, 5.0+ not yet verified" table. No code changes.
+
 ## 1.1.0 — 2026-08-03
 
 ### Stable release
