@@ -51,6 +51,7 @@ $string['completiondetail:course'] = 'Complete the Coassemble course';
 $string['connection_authoring_failed'] = 'API list access works, but authoring failed: {$a}. Confirm the workspace plan includes api_authoring.';
 $string['connection_authoring_note'] = 'List + authoring checks both passed.';
 $string['connection_authoring_ok'] = 'Authoring embed issuance succeeded (probe course cleaned up when possible).';
+$string['connection_coursecount'] = 'Courses visible to API key (sample page): {$a}';
 $string['connection_ok'] = 'Successfully connected to the Coassemble Headless API, including authoring.';
 $string['error_apirequest'] = 'Coassemble API request failed: {$a}';
 $string['error_embedurl'] = 'Coassemble did not return a valid signed embed URL.';

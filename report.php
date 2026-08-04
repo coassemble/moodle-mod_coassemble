@@ -64,8 +64,15 @@ $table->head = [
 ];
 $table->data = [];
 
+// Preload all tracked users in one query instead of one lookup per row.
+$users = [];
+if ($tracks) {
+    [$insql, $inparams] = $DB->get_in_or_equal(array_column($tracks, 'userid'), SQL_PARAMS_NAMED);
+    $users = $DB->get_records_select('user', "id $insql AND deleted = 0", $inparams);
+}
+
 foreach ($tracks as $track) {
-    $user = $DB->get_record('user', ['id' => $track->userid, 'deleted' => 0]);
+    $user = $users[$track->userid] ?? null;
     if (!$user) {
         continue;
     }

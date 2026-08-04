@@ -49,7 +49,7 @@ if (!empty($result['ok'])) {
     }
 }
 if (isset($result['coursecount'])) {
-    echo html_writer::tag('p', 'Courses visible to API key (sample page): ' . (int) $result['coursecount']);
+    echo html_writer::tag('p', get_string('connection_coursecount', 'mod_coassemble', (int) $result['coursecount']));
 }
 
 // Webhooks are managed automatically — report (and repair) registration here.

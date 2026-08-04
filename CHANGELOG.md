@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.0 — 2026-08-05
+
+Addresses the Moodle plugins directory review feedback.
+
+### Security
+- **Webhook deliveries now always require a verified signature.** Deliveries are rejected with `403` while no signing secret is stored (registration is automatic when API credentials are saved, and can be repaired from the connection test); the previous accept-unauthenticated fallback is removed. Progress still syncs through the authenticated player flow while webhooks are unregistered.
+
+### Changed
+- **AJAX endpoints migrated to External Services.** `update_course.php` and `update_progress.php` are replaced by the `mod_coassemble_update_course` and `mod_coassemble_update_progress` external functions (`classes/external/` + `db/services.php`), called from `mod_coassemble/embed` via `core/ajax`. Capability and context validation lives inside the external `execute()` methods; sesskey handling is core's.
+- Progress report preloads tracked users in a single query instead of one lookup per row.
+
+### Fixed
+- The connection-test course count is now a language-pack string (`connection_coursecount`) instead of hard-coded English.
+- `amd/src/embed.js` carries the standard Moodle GPL boilerplate header.
+
 ## 1.1.1 — 2026-08-03
 
 ### Docs

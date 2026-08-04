@@ -1,3 +1,18 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
 /**
  * Coassemble iframe host: origin-checked postMessage handling.
  *
@@ -5,7 +20,7 @@
  * @copyright  2026 Coassemble
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/notification'], function(Notification) {
+define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     /**
      * Parse a postMessage payload into an object, tolerating JSON strings.
      *
@@ -80,20 +95,6 @@ define(['core/notification'], function(Notification) {
     };
 
     /**
-     * POST url-encoded params to a plugin ajax endpoint.
-     *
-     * @param {string} url
-     * @param {URLSearchParams} body
-     * @return {Promise}
-     */
-    const postForm = (url, body) => fetch(url, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: body.toString(),
-        credentials: 'same-origin',
-    });
-
-    /**
      * Handle a session lifecycle event.
      *
      * @param {Object} payload
@@ -123,20 +124,23 @@ define(['core/notification'], function(Notification) {
         if (!isLinkEvent || !payload.data || !payload.data.id) {
             return;
         }
-        const body = new URLSearchParams();
-        body.set('cmid', String(config.cmid));
-        body.set('sesskey', config.sesskey);
-        body.set('courseid', String(payload.data.id));
-        if (payload.data.title) {
-            body.set('title', String(payload.data.title));
-        }
-        postForm(config.updateCourseUrl, body).catch(() => {
+        Ajax.call([{
+            methodname: 'mod_coassemble_update_course',
+            args: {
+                cmid: config.cmid,
+                courseid: Number(payload.data.id),
+                title: payload.data.title ? String(payload.data.title) : '',
+            },
+        }])[0].catch(() => {
             // Non-fatal: the server-side resolve fallback recovers the link.
         });
     };
 
     /**
      * Trigger a server-side progress sync when the player reports activity.
+     *
+     * The server ignores client-reported values and pulls authoritative
+     * trackings from Coassemble, so the event is only a sync trigger.
      *
      * @param {Object} payload
      * @param {Object} config
@@ -146,24 +150,10 @@ define(['core/notification'], function(Notification) {
         if (!info.isProgress && !info.isCompleted && !info.isCommenced) {
             return;
         }
-        const body = new URLSearchParams();
-        body.set('cmid', String(config.cmid));
-        body.set('sesskey', config.sesskey);
-        if (info.progress !== null) {
-            body.set('progress', String(info.progress));
-        }
-        if (info.isCommenced) {
-            body.set('commenced', '1');
-        }
-        if (info.isCompleted) {
-            body.set('completed', '1');
-            if (info.progress === null) {
-                body.set('progress', '100');
-            }
-        }
-        postForm(config.progressUrl, body).catch((err) => {
-            Notification.exception(err);
-        });
+        Ajax.call([{
+            methodname: 'mod_coassemble_update_progress',
+            args: {cmid: config.cmid},
+        }])[0].catch(Notification.exception);
     };
 
     /**
@@ -198,9 +188,9 @@ define(['core/notification'], function(Notification) {
                 }
             } else if (payload.type === 'session') {
                 handleSessionEvent(payload, statusEl, strings);
-            } else if (payload.type === 'course' && config.mode === 'edit') {
+            } else if (payload.type === 'course' && config.mode === 'edit' && config.persistCourse) {
                 handleCourseEditEvent(payload, config);
-            } else if (payload.type === 'course' && config.mode === 'view' && config.progressUrl) {
+            } else if (payload.type === 'course' && config.mode === 'view' && config.syncProgress) {
                 handleCourseViewEvent(payload, config);
             }
         };

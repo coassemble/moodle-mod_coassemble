@@ -162,7 +162,6 @@ if ($mode === 'collection') {
         'expectedOrigin' => coassemble_embed_origin($url),
         'mode' => $action === 'edit' ? 'edit' : 'view',
         'cmid' => (int) $cm->id,
-        'sesskey' => sesskey(),
         'backUrl' => $exiturl->out(false),
         'statusElId' => 'coassemble-session-status',
     ]]);
@@ -247,9 +246,8 @@ if ($mode === 'edit') {
         'expectedOrigin' => coassemble_embed_origin($embed['url']),
         'mode' => 'edit',
         'cmid' => (int) $cm->id,
-        'sesskey' => sesskey(),
         'backUrl' => $hascourse ? $backurl->out(false) : $resolveback->out(false),
-        'updateCourseUrl' => (new moodle_url('/mod/coassemble/update_course.php'))->out(false),
+        'persistCourse' => true,
         'statusElId' => 'coassemble-session-status',
         'strings' => [
             'ready' => get_string('session_ready', 'mod_coassemble'),
@@ -363,7 +361,6 @@ $jsconfig = [
     'expectedOrigin' => coassemble_embed_origin($embed['url']),
     'mode' => $canauthor ? 'edit' : 'view',
     'cmid' => (int) $cm->id,
-    'sesskey' => sesskey(),
     'statusElId' => 'coassemble-session-status',
     'strings' => [
         'ready' => get_string('session_ready', 'mod_coassemble'),
@@ -372,9 +369,9 @@ $jsconfig = [
     ],
 ];
 if ($canauthor) {
-    $jsconfig['updateCourseUrl'] = (new moodle_url('/mod/coassemble/update_course.php'))->out(false);
+    $jsconfig['persistCourse'] = true;
 } else {
-    $jsconfig['progressUrl'] = (new moodle_url('/mod/coassemble/update_progress.php'))->out(false);
+    $jsconfig['syncProgress'] = true;
 }
 $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [$jsconfig]);
 

@@ -15,29 +15,30 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Persist Coassemble course id / title from builder postMessage events.
+ * External function definitions for mod_coassemble.
  *
  * @package   mod_coassemble
  * @copyright 2026 Coassemble
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define('AJAX_SCRIPT', true);
+defined('MOODLE_INTERNAL') || die();
 
-require(__DIR__ . '/../../config.php');
-require_once(__DIR__ . '/lib.php');
-
-$cmid = required_param('cmid', PARAM_INT);
-$courseid = required_param('courseid', PARAM_INT);
-$title = optional_param('title', '', PARAM_TEXT);
-
-[$course, $cm] = get_course_and_cm_from_cmid($cmid, 'coassemble');
-$instance = $DB->get_record('coassemble', ['id' => $cm->instance], '*', MUST_EXIST);
-
-require_login($course, false, $cm);
-require_sesskey();
-require_capability('mod/coassemble:author', context_module::instance($cm->id));
-
-$instance = \mod_coassemble\local\course_link::persist($instance, $courseid, $title);
-
-echo json_encode(['ok' => true, 'courseid' => (int) $instance->coassemblecourseid]);
+$functions = [
+    'mod_coassemble_update_course' => [
+        'classname' => 'mod_coassemble\external\update_course',
+        'methodname' => 'execute',
+        'description' => 'Persist the Coassemble course id/title reported by the builder embed.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'mod/coassemble:author',
+    ],
+    'mod_coassemble_update_progress' => [
+        'classname' => 'mod_coassemble\external\update_progress',
+        'methodname' => 'execute',
+        'description' => 'Mirror the current user\'s authoritative Coassemble tracking into Moodle.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'mod/coassemble:view',
+    ],
+];

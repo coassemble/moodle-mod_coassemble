@@ -44,29 +44,34 @@ if ($deliveryid === '') {
     exit;
 }
 
-// Deliveries are verified when a signing secret is configured. Without one
-// (e.g. before "Register webhook automatically" has run) deliveries are
-// accepted unauthenticated so the integration still works out of the box.
+// Every delivery must carry a verifiable signature. Until webhook
+// registration has stored a signing secret (automatic on saving API
+// credentials, or via the connection test) all deliveries are rejected —
+// progress still syncs through the authenticated player flow.
 $secret = (string) get_config('mod_coassemble', 'webhooksecret');
-if ($secret !== '') {
-    if ($timestamp === '' || $signature === '') {
-        http_response_code(400);
-        echo json_encode(['ok' => false, 'error' => 'Missing signature headers']);
-        exit;
-    }
+if ($secret === '') {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'Webhook signing secret is not configured on this site']);
+    exit;
+}
 
-    // Reject stale timestamps (> 5 minutes).
-    if (!\mod_coassemble\local\webhook_utils::timestamp_fresh($timestamp)) {
-        http_response_code(401);
-        echo json_encode(['ok' => false, 'error' => 'Stale timestamp']);
-        exit;
-    }
+if ($timestamp === '' || $signature === '') {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Missing signature headers']);
+    exit;
+}
 
-    if (!\mod_coassemble\local\webhook_utils::verify_signature($timestamp, $raw, $signature, [$secret])) {
-        http_response_code(401);
-        echo json_encode(['ok' => false, 'error' => 'Invalid signature']);
-        exit;
-    }
+// Reject stale timestamps (> 5 minutes).
+if (!\mod_coassemble\local\webhook_utils::timestamp_fresh($timestamp)) {
+    http_response_code(401);
+    echo json_encode(['ok' => false, 'error' => 'Stale timestamp']);
+    exit;
+}
+
+if (!\mod_coassemble\local\webhook_utils::verify_signature($timestamp, $raw, $signature, [$secret])) {
+    http_response_code(401);
+    echo json_encode(['ok' => false, 'error' => 'Invalid signature']);
+    exit;
 }
 
 if ($DB->record_exists('coassemble_webhook', ['deliveryid' => $deliveryid])) {
