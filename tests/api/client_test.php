@@ -63,21 +63,18 @@ final class client_test extends \basic_testcase {
         $this->assertSame(['action' => 'view'], client::strip_empty_options(['action' => 'view']));
     }
 
-    /**
-     * Course embed bodies always opt into Builder 2.
-     */
-    public function test_prepare_course_embed_body(): void {
+    public function test_force_builder2_options(): void {
         $this->assertSame(
             ['action' => 'view', 'options' => ['legacy' => false]],
-            client::prepare_course_embed_body(['action' => 'view'])
+            client::force_builder2_options(['action' => 'view'])
         );
         $this->assertSame(
             ['action' => 'view', 'options' => ['legacy' => false]],
-            client::prepare_course_embed_body(['action' => 'view', 'options' => []])
+            client::force_builder2_options(['action' => 'view', 'options' => []])
         );
         $this->assertSame(
             ['action' => 'view', 'options' => ['legacy' => false]],
-            client::prepare_course_embed_body(['action' => 'view', 'options' => 'invalid'])
+            client::force_builder2_options(['action' => 'view', 'options' => 'invalid'])
         );
 
         $body = [
@@ -93,11 +90,11 @@ final class client_test extends \basic_testcase {
         ];
         $expected = $body;
         $expected['options']['legacy'] = false;
-        $this->assertSame($expected, client::prepare_course_embed_body($body));
+        $this->assertSame($expected, client::force_builder2_options($body));
 
         $this->assertSame(
             ['action' => 'edit', 'options' => ['legacy' => false, 'back' => 'hidden']],
-            client::prepare_course_embed_body([
+            client::force_builder2_options([
                 'action' => 'edit',
                 'options' => ['legacy' => true, 'back' => 'hidden'],
             ])

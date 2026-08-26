@@ -197,15 +197,12 @@ class client {
     }
 
     /**
-     * Force Builder 2 on a course embed body.
-     *
-     * Headless treats omitted or true options.legacy as Builder 1. This plugin
-     * issues Builder 2 only, so every course embed sets legacy to false.
+     * Headless treats omitted or true options.legacy as Builder 1.
      *
      * @param array $body
      * @return array
      */
-    public static function prepare_course_embed_body(array $body): array {
+    public static function force_builder2_options(array $body): array {
         if (!isset($body['options']) || !is_array($body['options'])) {
             $body['options'] = [];
         }
@@ -220,7 +217,7 @@ class client {
      * @return array
      */
     public function issue_course_embed(array $body) {
-        $body = self::prepare_course_embed_body($body);
+        $body = self::force_builder2_options($body);
         $url = $this->request('POST', '/api/v1/headless/embed/course', $body, [], true);
         if (!is_string($url) || $url === '') {
             throw new \moodle_exception('error_embedurl', 'mod_coassemble');
