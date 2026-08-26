@@ -62,4 +62,45 @@ final class client_test extends \basic_testcase {
         // Absent options are untouched.
         $this->assertSame(['action' => 'view'], client::strip_empty_options(['action' => 'view']));
     }
+
+    /**
+     * Course embed bodies always opt into Builder 2.
+     */
+    public function test_prepare_course_embed_body(): void {
+        $this->assertSame(
+            ['action' => 'view', 'options' => ['legacy' => false]],
+            client::prepare_course_embed_body(['action' => 'view'])
+        );
+        $this->assertSame(
+            ['action' => 'view', 'options' => ['legacy' => false]],
+            client::prepare_course_embed_body(['action' => 'view', 'options' => []])
+        );
+        $this->assertSame(
+            ['action' => 'view', 'options' => ['legacy' => false]],
+            client::prepare_course_embed_body(['action' => 'view', 'options' => 'invalid'])
+        );
+
+        $body = [
+            'action' => 'edit',
+            'options' => [
+                'back' => 'event',
+                'flow' => 'ai',
+                'ai' => true,
+                'googleDrive' => true,
+                'oneDrive' => true,
+                'feedback' => true,
+            ],
+        ];
+        $expected = $body;
+        $expected['options']['legacy'] = false;
+        $this->assertSame($expected, client::prepare_course_embed_body($body));
+
+        $this->assertSame(
+            ['action' => 'edit', 'options' => ['legacy' => false, 'back' => 'hidden']],
+            client::prepare_course_embed_body([
+                'action' => 'edit',
+                'options' => ['legacy' => true, 'back' => 'hidden'],
+            ])
+        );
+    }
 }

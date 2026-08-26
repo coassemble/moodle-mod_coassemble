@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 — 2026-08-26
+
+### Changed
+- New Moodle-created courses use Builder 2. Every course embed sets `options.legacy: false`.
+- Create flow choices are now start from scratch and generate with AI. Document and presentation flows are no longer offered.
+
 ## 1.2.0 — 2026-08-05
 
 Addresses the Moodle plugins directory review feedback.

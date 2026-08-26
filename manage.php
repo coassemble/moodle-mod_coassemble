@@ -201,8 +201,6 @@ if (!empty($instance->coassemblecourseid)) {
     $createflows = [
         '' => get_string('flow_scratch', 'mod_coassemble'),
         'ai' => get_string('flow_ai', 'mod_coassemble'),
-        'document' => get_string('flow_document', 'mod_coassemble'),
-        'presentation' => get_string('flow_presentation', 'mod_coassemble'),
     ];
     foreach ($createflows as $fkey => $flabel) {
         echo $OUTPUT->single_button(
