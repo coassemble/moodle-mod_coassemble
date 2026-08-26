@@ -46,7 +46,7 @@ Configure **Site administration → Plugins → Activity modules → Coassemble*
 
 1. Add a **Coassemble** activity to a Moodle course.
 2. Open the activity → Course Builder embed loads in an embedded (full-bleed) layout (`POST /api/v1/headless/embed/course`, `action: edit`).
-3. Pick a create flow: scratch / AI / document / presentation.
+3. Pick a create flow: start from scratch or generate with AI. New courses use Builder 2.
 4. The plugin stores the Coassemble `courseId` (JWT claim and/or `course.updated` postMessage). Fallback: **Find linked course from Coassemble**.
 5. Use **Manage content** to publish, revert, duplicate, soft-delete, restore, or download SCORM.
 6. Learners open the same activity to take the course in the player embed.

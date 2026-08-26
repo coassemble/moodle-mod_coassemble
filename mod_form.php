@@ -53,8 +53,6 @@ class mod_coassemble_mod_form extends moodleform_mod {
         $flows = [
             '' => get_string('flow_scratch', 'mod_coassemble'),
             'ai' => get_string('flow_ai', 'mod_coassemble'),
-            'document' => get_string('flow_document', 'mod_coassemble'),
-            'presentation' => get_string('flow_presentation', 'mod_coassemble'),
         ];
         $mform->addElement('select', 'flow', get_string('flow', 'mod_coassemble'), $flows);
         $mform->addHelpButton('flow', 'flow', 'mod_coassemble');

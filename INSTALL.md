@@ -32,7 +32,7 @@ moodle/
 
 1. As editing teacher, add **Coassemble** to a course.
 2. Open the activity → builder (embedded layout).
-3. Create content (scratch / AI / document / presentation…).
+3. Create content from scratch or generate it with AI. New courses use Builder 2.
 4. Confirm **Manage content** shows a Coassemble course ID and publish status.
 5. Publish, then open as a student and complete the course.
 6. Confirm gradebook + completion; optionally disconnect network mid-completion and rely on webhook.

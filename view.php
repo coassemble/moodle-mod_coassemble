@@ -190,6 +190,7 @@ if ($mode === 'edit') {
 
     $options = [
         'back' => 'event',
+        'legacy' => false,
         'ai' => true,
         'googleDrive' => true,
         'oneDrive' => true,
@@ -269,8 +270,6 @@ if ($mode === 'edit') {
     $createflows = [
         '' => get_string('flow_scratch', 'mod_coassemble'),
         'ai' => get_string('flow_ai', 'mod_coassemble'),
-        'document' => get_string('flow_document', 'mod_coassemble'),
-        'presentation' => get_string('flow_presentation', 'mod_coassemble'),
     ];
     if (empty($instance->coassemblecourseid)) {
         echo html_writer::start_div('coassemble-flow-bar');
@@ -326,7 +325,7 @@ $body = [
     'identifier' => $identifier,
     'clientIdentifier' => $clientidentifier,
     'name' => $displayname,
-    'options' => [],
+    'options' => ['legacy' => false],
 ];
 if ($canauthor) {
     // Authors get a builder preview instead of the learner player, so

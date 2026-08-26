@@ -115,7 +115,7 @@ class client {
                 'identifier' => $probeid,
                 'clientIdentifier' => 'moodle-connection-probe',
                 'name' => 'Moodle connection probe',
-                'options' => ['back' => 'hidden'],
+                'options' => ['back' => 'hidden', 'legacy' => false],
             ]);
             $authoringok = true;
             if (!empty($embed['courseid'])) {
@@ -197,13 +197,27 @@ class client {
     }
 
     /**
+     * Headless treats omitted or true options.legacy as Builder 1.
+     *
+     * @param array $body
+     * @return array
+     */
+    public static function force_builder2_options(array $body): array {
+        if (!isset($body['options']) || !is_array($body['options'])) {
+            $body['options'] = [];
+        }
+        $body['options']['legacy'] = false;
+        return self::strip_empty_options($body);
+    }
+
+    /**
      * Issue a signed course embed URL.
      *
      * @param array $body
      * @return array
      */
     public function issue_course_embed(array $body) {
-        $body = self::strip_empty_options($body);
+        $body = self::force_builder2_options($body);
         $url = $this->request('POST', '/api/v1/headless/embed/course', $body, [], true);
         if (!is_string($url) || $url === '') {
             throw new \moodle_exception('error_embedurl', 'mod_coassemble');

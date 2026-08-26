@@ -62,4 +62,42 @@ final class client_test extends \basic_testcase {
         // Absent options are untouched.
         $this->assertSame(['action' => 'view'], client::strip_empty_options(['action' => 'view']));
     }
+
+    public function test_force_builder2_options(): void {
+        $this->assertSame(
+            ['action' => 'view', 'options' => ['legacy' => false]],
+            client::force_builder2_options(['action' => 'view'])
+        );
+        $this->assertSame(
+            ['action' => 'view', 'options' => ['legacy' => false]],
+            client::force_builder2_options(['action' => 'view', 'options' => []])
+        );
+        $this->assertSame(
+            ['action' => 'view', 'options' => ['legacy' => false]],
+            client::force_builder2_options(['action' => 'view', 'options' => 'invalid'])
+        );
+
+        $body = [
+            'action' => 'edit',
+            'options' => [
+                'back' => 'event',
+                'flow' => 'ai',
+                'ai' => true,
+                'googleDrive' => true,
+                'oneDrive' => true,
+                'feedback' => true,
+            ],
+        ];
+        $expected = $body;
+        $expected['options']['legacy'] = false;
+        $this->assertSame($expected, client::force_builder2_options($body));
+
+        $this->assertSame(
+            ['action' => 'edit', 'options' => ['legacy' => false, 'back' => 'hidden']],
+            client::force_builder2_options([
+                'action' => 'edit',
+                'options' => ['legacy' => true, 'back' => 'hidden'],
+            ])
+        );
+    }
 }
