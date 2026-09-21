@@ -29,6 +29,7 @@ require_once($CFG->dirroot . '/mod/coassemble/lib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \mod_coassemble\completion\custom_completion
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\completion\custom_completion::class)]
 final class custom_completion_test extends \advanced_testcase {
     /**
      * The rule flips from incomplete to complete when mirrored tracking completes.

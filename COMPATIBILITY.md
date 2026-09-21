@@ -1,29 +1,31 @@
 # Compatibility matrix — mod_coassemble
 
-Declared support: `$plugin->supported = [401, 501]` — **Moodle 4.1 to 5.1**.
-Minimum: `$plugin->requires = 2022112800` (Moodle 4.1). Maturity: **stable**.
-Plugin release **1.2.0**, version `2026080500`.
+Declared support: `$plugin->supported = [401, 502]` — **Moodle 4.1 to 5.2**.
+Minimum: `$plugin->requires = 2022112800` (Moodle 4.1).
+Plugin release **1.3.1**, version `2026092100`.
 
-| Moodle | PHP | Status |
-|--------|-----|--------|
-| 4.1 (LTS) | 8.1 | Supported — CI tested |
-| 4.2 | 8.0–8.1 | Supported |
-| 4.3 | 8.0–8.2 | Supported |
-| 4.4 | 8.2 | Supported — CI tested |
-| 4.5 (LTS) | 8.3 | Supported — CI tested |
-| 5.0 | 8.2 | Supported — CI tested |
-| 5.1 | 8.3 | Supported — CI tested |
+| Moodle | PHP in CI | Coverage |
+|--------|-----------|----------|
+| 4.1 | 8.1 | Legacy compatibility, PostgreSQL and MariaDB |
+| 4.4 | 8.2 | Legacy compatibility, PostgreSQL |
+| 4.5 (LTS) | 8.3 | PostgreSQL and MariaDB |
+| 5.0 | 8.2 | PostgreSQL |
+| 5.1 | 8.3 | PostgreSQL and MariaDB |
+| 5.2 | 8.3 | PostgreSQL and MariaDB |
+| 5.3 development (`main`) | 8.4 | Forward compatibility, PostgreSQL; not declared stable support |
 
-Continuous integration (GitHub Actions, `moodle-plugin-ci`) runs the matrix above
-across PHP 8.1–8.3 on **PostgreSQL 15** and **MariaDB 10.11** (the minimums Moodle
-5.1 requires). Rows marked "CI tested" build on every push; 4.2 and 4.3 sit inside
-the declared support range and are covered by the shared 4.x code paths. The module
-uses only current completion, privacy, backup/restore and event APIs, with none
-deprecated or removed on the 5.0/5.1 line.
+These are configured CI targets, not a claim that this uncommitted revision has
+passed every matrix job. See [CERTIFICATION_REVIEW.md](CERTIFICATION_REVIEW.md)
+for evidence and outstanding validation. Moodle 4.2 and 4.3 remain within the
+legacy range but have no dedicated CI jobs.
 
-Note: Moodle 4.1 reached end of life in December 2025. The `requires` floor is kept
-at 4.1 so existing installs can upgrade in place; it is expected to rise in a future
-release.
+As of 21 September 2026, maintained Moodle releases are 4.5, 5.0, 5.1 and 5.2;
+5.3 is scheduled for 5 October 2026. See the official
+[release schedule](https://moodledev.io/general/releases).
+Older branches are retained for existing installations; new sites should use a
+maintained Moodle release and its supported PHP version. CI uses PostgreSQL 16
+and MariaDB 10.11. Bootstrap spacing uses plugin-scoped logical CSS properties,
+so it works on both Bootstrap 4 and Bootstrap 5 without deprecated utilities.
 
 ## Coassemble API
 

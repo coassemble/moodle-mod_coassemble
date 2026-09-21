@@ -34,6 +34,7 @@ use core_privacy\local\request\writer;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \mod_coassemble\privacy\provider
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\privacy\provider::class)]
 final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Create an activity with tracked progress for a user.

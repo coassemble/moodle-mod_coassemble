@@ -24,6 +24,7 @@ namespace mod_coassemble\local;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \mod_coassemble\local\identity
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\local\identity::class)]
 final class identity_test extends \advanced_testcase {
     /**
      * A minted identifier maps back to the same user id.

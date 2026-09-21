@@ -24,6 +24,7 @@ namespace mod_coassemble\api;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \mod_coassemble\api\client
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\api\client::class)]
 final class client_test extends \basic_testcase {
     /**
      * Pasted keys are normalised to the full COASSEMBLE:{workspace}:{secret} form.
@@ -63,6 +64,9 @@ final class client_test extends \basic_testcase {
         $this->assertSame(['action' => 'view'], client::strip_empty_options(['action' => 'view']));
     }
 
+    /**
+     * Course embeds use Builder 2 while preserving other embed options.
+     */
     public function test_force_builder2_options(): void {
         $this->assertSame(
             ['action' => 'view', 'options' => ['legacy' => false]],

@@ -24,6 +24,7 @@ namespace mod_coassemble\local;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \mod_coassemble\local\webhook_utils
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\local\webhook_utils::class)]
 final class webhook_utils_test extends \basic_testcase {
     /**
      * Sign a body the way Coassemble does.
