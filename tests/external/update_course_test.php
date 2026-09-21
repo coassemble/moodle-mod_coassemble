@@ -79,6 +79,19 @@ final class update_course_test extends \advanced_testcase {
     }
 
     /**
+     * A builder left open before unlinking must not silently restore that link.
+     */
+    public function test_stale_builder_cannot_undo_unlink(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        [, $instance, $cm] = $this->setup_activity();
+        $instance = \mod_coassemble\local\course_link::persist($instance, 123, '', 'created');
+        \mod_coassemble\local\course_link::unlink($instance);
+        $this->expectException(\moodle_exception::class);
+        update_course::execute((int) $cm->id, 123, 'Stale tab');
+    }
+
+    /**
      * Users without the author capability are rejected.
      */
     public function test_student_cannot_persist_course_link(): void {

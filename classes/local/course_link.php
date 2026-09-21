@@ -148,45 +148,4 @@ class course_link {
             $lock->release();
         }
     }
-
-    /**
-     * Fallback: find the newest Headless course for this author + tenant and link it.
-     *
-     * Used when JWT decode failed and no course.updated event arrived.
-     *
-     * @param \stdClass $instance
-     * @param \mod_coassemble\api\client $client
-     * @param string $identifier
-     * @param string $clientidentifier
-     * @return \stdClass
-     */
-    public static function resolve_from_api(\stdClass $instance, $client, $identifier, $clientidentifier) {
-        if (!empty($instance->coassemblecourseid)) {
-            return $instance;
-        }
-
-        $courses = $client->list_courses([
-            'identifier' => $identifier,
-            'clientIdentifier' => $clientidentifier,
-            'length' => 25,
-        ]);
-
-        if (!$courses) {
-            return $instance;
-        }
-
-        // Prefer the most recently updated / created course.
-        usort($courses, function ($a, $b) {
-            $at = strtotime((string) ($a['updated'] ?? $a['created'] ?? '')) ?: 0;
-            $bt = strtotime((string) ($b['updated'] ?? $b['created'] ?? '')) ?: 0;
-            return $bt <=> $at;
-        });
-
-        $best = $courses[0];
-        if (empty($best['id'])) {
-            return $instance;
-        }
-
-        return self::persist($instance, (int) $best['id'], (string) ($best['title'] ?? ''));
-    }
 }

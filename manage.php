@@ -234,6 +234,7 @@ if (!empty($instance->coassemblecourseid)) {
     $createflows = [
         '' => get_string('flow_scratch', 'mod_coassemble'),
         'ai' => get_string('flow_ai', 'mod_coassemble'),
+        'existing' => get_string('flow_existing', 'mod_coassemble'),
     ];
     foreach ($createflows as $fkey => $flabel) {
         echo $OUTPUT->single_button(
@@ -246,11 +247,6 @@ if (!empty($instance->coassemblecourseid)) {
             'get'
         );
     }
-    echo $OUTPUT->single_button(
-        new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'resolve' => 1]),
-        get_string('resolve_course', 'mod_coassemble'),
-        'post'
-    );
     echo html_writer::end_div();
 }
 

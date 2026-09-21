@@ -85,6 +85,9 @@ class update_course extends \core_external\external_api {
         if (!empty($instance->coassemblecourseid) && (int) $instance->coassemblecourseid !== $courseid) {
             throw new \moodle_exception('error_coursechanged', 'mod_coassemble');
         }
+        if (empty($instance->coassemblecourseid) && $instance->flow === 'existing') {
+            throw new \moodle_exception('error_coursechanged', 'mod_coassemble');
+        }
         $instance = \mod_coassemble\local\course_link::persist($instance, $courseid, $title);
 
         return ['courseid' => (int) $instance->coassemblecourseid];

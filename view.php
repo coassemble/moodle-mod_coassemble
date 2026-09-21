@@ -30,7 +30,7 @@ require_once(__DIR__ . '/lib.php');
 
 $id = required_param('id', PARAM_INT);
 $mode = optional_param('mode', '', PARAM_ALPHA); // One of: edit, view, create or collection.
-$flow = optional_param('flow', '', PARAM_ALPHANUMEXT);
+$flow = optional_param('flow', null, PARAM_ALPHANUMEXT);
 $resolve = optional_param('resolve', 0, PARAM_BOOL);
 
 [$course, $cm] = get_course_and_cm_from_cmid($id, 'coassemble');
@@ -51,7 +51,7 @@ if ($resolve) {
 
 if ($mode === '') {
     if ($canauthor && !$hascourse && !$hascollection) {
-        $mode = 'edit';
+        $mode = 'choose';
     } else if ($canauthor && optional_param('edit', 0, PARAM_BOOL)) {
         $mode = 'edit';
     } else if ($hascollection && !$hascourse) {
@@ -63,6 +63,11 @@ if ($mode === '') {
 
 if ($mode === 'create') {
     $mode = 'edit';
+}
+
+$selectedflow = $flow ?? (string) $instance->flow;
+if ($canauthor && !$hascourse && ($resolve || $selectedflow === 'existing')) {
+    redirect(new moodle_url('/mod/coassemble/library.php', ['id' => $cm->id]));
 }
 
 $isedit = ($mode === 'edit');
@@ -101,34 +106,26 @@ if (!$client->is_configured()) {
     exit;
 }
 
+if ($mode === 'choose') {
+    require_capability('mod/coassemble:author', $context);
+    echo $OUTPUT->header();
+    echo $OUTPUT->heading(format_string($instance->name));
+    $flowlinks = [];
+    foreach (['' => 'flow_scratch', 'ai' => 'flow_ai', 'existing' => 'flow_existing'] as $key => $label) {
+        $url = new moodle_url('/mod/coassemble/view.php', ['id' => $id, 'mode' => 'edit', 'flow' => $key]);
+        $flowlinks[] = ['url' => $url->out(false), 'label' => get_string($label, 'mod_coassemble')];
+    }
+    echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
+        'label' => get_string('flow', 'mod_coassemble'), 'links' => $flowlinks,
+    ]);
+    echo $OUTPUT->footer();
+    exit;
+}
+
 $identifier = \mod_coassemble\local\identity::for_user($USER);
 $clientidentifier = \mod_coassemble\local\identity::client_identifier();
 $displayname = \mod_coassemble\local\identity::display_name($USER);
 $avatar = \mod_coassemble\local\identity::avatar_url($USER);
-
-if ($resolve && $canauthor && !$hascourse) {
-    try {
-        $instance = \mod_coassemble\local\course_link::resolve_from_api(
-            $instance,
-            $client,
-            $identifier,
-            $clientidentifier
-        );
-    } catch (Throwable $e) {
-        \mod_coassemble\local\diagnostics::log($e, 'resolve');
-        redirect(
-            new moodle_url('/mod/coassemble/manage.php', ['id' => $cm->id]),
-            get_string('error_apirequest', 'mod_coassemble'),
-            null,
-            \core\output\notification::NOTIFY_ERROR
-        );
-    }
-    $hascourse = !empty($instance->coassemblecourseid);
-    if ($hascourse) {
-        redirect(new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'mode' => 'view']));
-    }
-}
-
 
 // In singleactivity format the course page is this activity itself, so
 // "back" must leave the course entirely.
@@ -210,7 +207,6 @@ if ($mode === 'edit') {
         // publish/revert lifecycle (API default is already false).
     ];
 
-    $selectedflow = $flow !== '' ? $flow : (string) $instance->flow;
     if ($selectedflow !== '' && empty($instance->coassemblecourseid)) {
         $options['flow'] = $selectedflow;
     }
@@ -277,6 +273,7 @@ if ($mode === 'edit') {
     $createflows = [
         '' => get_string('flow_scratch', 'mod_coassemble'),
         'ai' => get_string('flow_ai', 'mod_coassemble'),
+        'existing' => get_string('flow_existing', 'mod_coassemble'),
     ];
     if (empty($instance->coassemblecourseid)) {
         $flowlinks = [];
@@ -325,9 +322,9 @@ if (!$hascourse) {
             'get'
         );
         echo $OUTPUT->single_button(
-            new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'resolve' => 1]),
-            get_string('resolve_course', 'mod_coassemble'),
-            'post'
+            new moodle_url('/mod/coassemble/library.php', ['id' => $cm->id]),
+            get_string('flow_existing', 'mod_coassemble'),
+            'get'
         );
     }
     echo $OUTPUT->footer();
