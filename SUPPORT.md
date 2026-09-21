@@ -60,7 +60,7 @@
 
 ## Logging
 
-- Moodle: enable developer debug briefly and reproduce.
+- Moodle: open Site administration → Reports → Logs and filter for the **Coassemble request failed** event. API failures record the HTTP method, endpoint path, HTTP status and cURL error number. Other failures record the operation and exception type. Raw exception messages, response bodies, credentials and signed embed URLs are deliberately omitted.
 - Coassemble: check API request logs / webhook delivery history in workspace settings.
 
 ## Escalation checklist
@@ -68,5 +68,15 @@
 1. Moodle version + plugin `version.php` release
 2. API base URL / workspace id (not the API key)
 3. Whether failure is authoring, viewing, grading, or webhooks
-4. Exact HTTP status + response message from Headless
+4. HTTP status and operation from the Moodle event log (do not include raw payloads, keys or signed URLs)
 5. Whether postMessage events fire in the browser
+
+## Contact support
+
+For help or to report a bug, email [gday@coassemble.com](mailto:gday@coassemble.com),
+or log in at [coassemble.com](https://coassemble.com) and use the support chat.
+
+Include your Moodle, PHP and plugin versions, steps to reproduce the problem,
+expected and actual behaviour, and redacted screenshots or logs. Use the
+escalation checklist above to help us investigate. Do not include API keys,
+signed embed URLs or learner data.

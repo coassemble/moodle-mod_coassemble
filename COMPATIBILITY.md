@@ -14,10 +14,9 @@ Plugin release **1.3.1**, version `2026092100`.
 | 5.2 | 8.3 | PostgreSQL and MariaDB |
 | 5.3 development (`main`) | 8.4 | Forward compatibility, PostgreSQL; not declared stable support |
 
-These are configured CI targets, not a claim that this uncommitted revision has
-passed every matrix job. See [CERTIFICATION_REVIEW.md](CERTIFICATION_REVIEW.md)
-for evidence and outstanding validation. Moodle 4.2 and 4.3 remain within the
-legacy range but have no dedicated CI jobs.
+The workflow defines the CI targets above. Check its results for the revision
+you plan to deploy. Moodle 4.2 and 4.3 remain within the legacy range but have
+no dedicated CI jobs.
 
 As of 21 September 2026, maintained Moodle releases are 4.5, 5.0, 5.1 and 5.2;
 5.3 is scheduled for 5 October 2026. See the official

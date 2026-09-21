@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Email Coassemble support
+    url: mailto:gday@coassemble.com
+    about: Get help or report a bug by emailing our support team.
+  - name: Chat with Coassemble support
+    url: https://coassemble.com
+    about: Log in to Coassemble and use the support chat for help or bug reports.

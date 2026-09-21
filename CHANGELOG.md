@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.1 (unreleased)
+
+- Require POST and sesskey validation for course recovery and management actions.
+- Keep API failures generic in pages and AJAX; record safe server diagnostics.
+- Use Moodle's file-send helper for SCORM downloads.
+- Render shared embed/navigation and the analytics picker with Mustache templates.
+- Preserve Moodle navigation during authoring and learning; announce session status.
+- Fix the activity icon under Moodle's monochrome filters and remove legacy spacing classes.
+- Add Moodle 5.2 and development 5.3 CI targets, explicit subscription documentation,
+  directory copy and support contact details.
+
 ## 1.3.0 — 2026-08-26
 
 ### Changed

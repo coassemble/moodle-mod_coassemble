@@ -9,8 +9,17 @@ This package lives in its **own repository** and installs as `mod/coassemble`.
 ## Links
 
 - **Source code:** https://github.com/coassemble/moodle-mod_coassemble
-- **Issue tracker:** https://github.com/coassemble/moodle-mod_coassemble/issues
-- **Documentation:** _TODO: docs page on coassemble.com_
+- **Support and bug reports:** Email [gday@coassemble.com](mailto:gday@coassemble.com), or log in at [coassemble.com](https://coassemble.com) and use the support chat.
+- **Documentation:** [Installation](INSTALL.md), [support](SUPPORT.md), and [Coassemble API documentation](https://developers.coassemble.com/get-started)
+
+## Subscription required
+
+The plugin is free to download and install. **An active, paid Coassemble
+subscription with API access and authoring entitlement is required to use it.**
+Obtain a subscription directly from [Coassemble](https://coassemble.com/pricing)
+or through a Coassemble partner. Installing this plugin does not include a
+Coassemble subscription. Confirm API and authoring access with Coassemble before
+purchasing; availability depends on your subscription.
 
 ## External services disclosure
 
@@ -28,9 +37,9 @@ Data received from Coassemble: course metadata (titles, publish state), learner 
 
 | Component | Version |
 |-----------|---------|
-| Moodle | 4.1 – 5.1 (`$plugin->supported`) |
+| Moodle | 4.1 – 5.2 (`$plugin->supported`) |
 | PHP | 8.1+ |
-| Coassemble plan | API access **and** `api_authoring` |
+| Coassemble plan | Paid subscription with API access **and** `api_authoring` |
 
 ## Install
 
@@ -45,7 +54,7 @@ Configure **Site administration → Plugins → Activity modules → Coassemble*
 ## Teacher flow (core)
 
 1. Add a **Coassemble** activity to a Moodle course.
-2. Open the activity → Course Builder embed loads in an embedded (full-bleed) layout (`POST /api/v1/headless/embed/course`, `action: edit`).
+2. Open the activity → Course Builder embed loads inside the Moodle course page (`POST /api/v1/headless/embed/course`, `action: edit`).
 3. Pick a create flow: start from scratch or generate with AI. New courses use Builder 2.
 4. The plugin stores the Coassemble `courseId` (JWT claim and/or `course.updated` postMessage). Fallback: **Find linked course from Coassemble**.
 5. Use **Manage content** to publish, revert, duplicate, soft-delete, restore, or download SCORM.
