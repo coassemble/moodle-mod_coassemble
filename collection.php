@@ -76,6 +76,12 @@ $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [[
     'expectedOrigin' => coassemble_embed_origin($url),
     'mode' => $action === 'edit' ? 'edit' : 'view',
     'cmid' => (int) $cm->id,
+    'statusElId' => 'coassemble-session-status',
+    'strings' => [
+        'ready' => get_string('session_ready', 'mod_coassemble'),
+        'error' => get_string('session_error', 'mod_coassemble'),
+        'expired' => get_string('session_expired', 'mod_coassemble'),
+    ],
     'sesskey' => sesskey(),
     'backUrl' => (new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id]))->out(false),
 ]]);
@@ -83,13 +89,10 @@ $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [[
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('collection_heading', 'mod_coassemble'));
 echo html_writer::tag('p', get_string('collection_help', 'mod_coassemble'));
-echo html_writer::start_div('coassemble-embed-shell');
-echo html_writer::tag('iframe', '', [
-    'id' => 'coassemble-embed-frame',
-    'src' => $url,
-    'class' => 'coassemble-embed-iframe',
-    'allow' => 'clipboard-write; fullscreen; microphone; camera',
+echo $OUTPUT->render_from_template('mod_coassemble/embed', [
+    'url' => $url,
     'title' => get_string('collection_iframe_title', 'mod_coassemble'),
+    'allow' => 'clipboard-write; fullscreen; microphone; camera',
+    'shellclass' => '',
 ]);
-echo html_writer::end_div();
 echo $OUTPUT->footer();

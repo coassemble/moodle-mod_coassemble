@@ -58,25 +58,23 @@ if ($kind === 'user' && !$userid) {
 
     $contextcourse = context_course::instance($course->id);
     $users = get_enrolled_users($contextcourse, 'mod/coassemble:view', 0, 'u.*', null, 0, 200);
-    $table = new html_table();
-    $table->head = [get_string('fullname'), get_string('email'), ''];
-    $table->data = [];
+    $rows = [];
     foreach ($users as $user) {
         $url = new moodle_url('/mod/coassemble/analytics.php', [
             'id' => $cm->id,
             'kind' => 'user',
             'userid' => $user->id,
         ]);
-        $table->data[] = [
-            fullname($user),
-            $user->email,
-            html_writer::link($url, get_string('analytics_user', 'mod_coassemble'), ['class' => 'btn btn-secondary btn-sm']),
+        $rows[] = [
+            'name' => fullname($user),
+            'email' => $user->email,
+            'url' => $url->out(false),
         ];
     }
-    if (!$table->data) {
+    if (!$rows) {
         echo $OUTPUT->notification(get_string('analytics_nousers', 'mod_coassemble'), 'info');
     } else {
-        echo html_writer::table($table);
+        echo $OUTPUT->render_from_template('mod_coassemble/analytics_users', ['users' => $rows]);
     }
     echo $OUTPUT->footer();
     exit;
@@ -115,33 +113,41 @@ $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [[
     'expectedOrigin' => coassemble_embed_origin($url),
     'mode' => 'analytics',
     'cmid' => (int) $cm->id,
-    'sesskey' => sesskey(),
     'statusElId' => 'coassemble-session-status',
+    'strings' => [
+        'ready' => get_string('session_ready', 'mod_coassemble'),
+        'error' => get_string('session_error', 'mod_coassemble'),
+        'expired' => get_string('session_expired', 'mod_coassemble'),
+    ],
+    'sesskey' => sesskey(),
 ]]);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('nav_analytics', 'mod_coassemble'));
-echo html_writer::div(
-    html_writer::link(
-        new moodle_url('/mod/coassemble/analytics.php', ['id' => $cm->id, 'kind' => 'course']),
-        get_string('analytics_course', 'mod_coassemble'),
-        ['class' => 'btn btn-secondary mr-1']
-    ) . ' ' .
-    html_writer::link(
-        new moodle_url('/mod/coassemble/analytics.php', ['id' => $cm->id, 'kind' => 'user']),
-        get_string('analytics_pick_user', 'mod_coassemble'),
-        ['class' => 'btn btn-secondary']
-    ),
-    'mb-2'
-);
-echo html_writer::div('', 'coassemble-session-status', ['id' => 'coassemble-session-status']);
-echo html_writer::start_div('coassemble-embed-shell');
-echo html_writer::tag('iframe', '', [
-    'id' => 'coassemble-embed-frame',
-    'src' => $url,
-    'class' => 'coassemble-embed-iframe',
-    'allow' => 'clipboard-write; fullscreen',
-    'title' => get_string('analytics_iframe_title', 'mod_coassemble'),
+echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
+    'label' => get_string('nav_analytics', 'mod_coassemble'),
+    'links' => [
+        [
+            'url' => (new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id]))->out(false),
+            'label' => get_string('backtoactivity', 'mod_coassemble'),
+            'exit' => true,
+        ],
+        [
+            'url' => (new moodle_url('/mod/coassemble/analytics.php', ['id' => $cm->id, 'kind' => 'course']))->out(false),
+            'label' => get_string('analytics_course', 'mod_coassemble'),
+            'current' => $kind === 'course',
+        ],
+        [
+            'url' => (new moodle_url('/mod/coassemble/analytics.php', ['id' => $cm->id, 'kind' => 'user']))->out(false),
+            'label' => get_string('analytics_pick_user', 'mod_coassemble'),
+            'current' => $kind === 'user',
+        ],
+    ],
 ]);
-echo html_writer::end_div();
+echo $OUTPUT->render_from_template('mod_coassemble/embed', [
+    'url' => $url,
+    'title' => get_string('analytics_iframe_title', 'mod_coassemble'),
+    'allow' => 'clipboard-write; fullscreen',
+    'shellclass' => '',
+]);
 echo $OUTPUT->footer();

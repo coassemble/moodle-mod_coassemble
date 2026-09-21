@@ -31,3 +31,17 @@ Feature: Coassemble activity basics
   Scenario: A teacher sees the same notice with a link to settings context
     When I am on the "Test Coassemble" "coassemble activity" page logged in as teacher1
     Then I should see "Coassemble API credentials are not configured"
+
+  @javascript
+  Scenario: Selecting an initial create flow preserves unsaved activity settings
+    Given I am on the "Test Coassemble" "coassemble activity editing" page logged in as teacher1
+    When I set the field "Name" to "Unsaved course title"
+    And I set the field "Initial create flow" to "Generate with AI"
+    Then the field "Name" matches value "Unsaved course title"
+    And the field "Initial create flow" matches value "Generate with AI"
+    And I should see "C1"
+
+  Scenario: Learners retain Moodle navigation on an activity page
+    When I am on the "Test Coassemble" "coassemble activity" page logged in as student1
+    Then ".navbar" "css_element" should exist
+    And I should see "C1"

@@ -1,0 +1,50 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_coassemble/embed
+
+    Shared course, collection and analytics iframe with an accessible status region.
+
+    Context variables required for this template:
+    * url - Signed iframe URL
+    * title - Accessible iframe title
+    * allow - Browser permission policy
+    * shellclass - Optional layout modifier
+    * resolve - Whether to render the recovery form
+    * resolveurl, cmid, sesskey - Recovery form fields
+
+    Example context (json):
+    {
+        "url": "https://example.com/embed",
+        "title": "Coassemble course",
+        "allow": "fullscreen",
+        "shellclass": "coassemble-embed-shell--view",
+        "resolve": false
+    }
+}}
+<div id="coassemble-session-status" class="coassemble-session-status" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="coassemble-embed-shell {{shellclass}}">
+    <iframe id="coassemble-embed-frame" src="{{url}}" class="coassemble-embed-iframe"
+        allow="{{allow}}" allowfullscreen title="{{title}}"></iframe>
+</div>
+{{#resolve}}
+<form id="coassemble-resolve-form" method="post" action="{{resolveurl}}" hidden>
+    <input type="hidden" name="id" value="{{cmid}}">
+    <input type="hidden" name="resolve" value="1">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+</form>
+{{/resolve}}

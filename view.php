@@ -66,15 +66,10 @@ if ($mode === 'create') {
 }
 
 $isedit = ($mode === 'edit');
-// Builder and player both run full-bleed; informational pages keep the
-// standard layout so site navigation stays available.
-$fullbleed = $isedit
-    || ($mode === 'view' && $hascourse)
-    || ($mode === 'collection' && $hascollection);
 $PAGE->set_url('/mod/coassemble/view.php', ['id' => $cm->id, 'mode' => $mode]);
 $PAGE->set_title(format_string($instance->name));
 $PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_pagelayout($fullbleed ? 'embedded' : 'standard');
+$PAGE->set_pagelayout('incourse');
 
 if (!$isedit) {
     $event = \mod_coassemble\event\course_module_viewed::create([
@@ -180,23 +175,23 @@ if ($mode === 'collection') {
         'cmid' => (int) $cm->id,
         'backUrl' => $exiturl->out(false),
         'statusElId' => 'coassemble-session-status',
+        'strings' => [
+            'ready' => get_string('session_ready', 'mod_coassemble'),
+            'error' => get_string('session_error', 'mod_coassemble'),
+            'expired' => get_string('session_expired', 'mod_coassemble'),
+        ],
     ]]);
     echo $OUTPUT->header();
-    echo html_writer::div(
-        html_writer::link($exiturl, $exitlabel, ['class' => 'btn btn-link coassemble-exit-authoring']),
-        'coassemble-authoring-chrome coassemble-player-chrome'
-    );
-    echo html_writer::div('', 'coassemble-session-status', ['id' => 'coassemble-session-status']);
-    echo html_writer::start_div('coassemble-embed-shell coassemble-embed-shell--view');
-    echo html_writer::tag('iframe', '', [
-        'id' => 'coassemble-embed-frame',
-        'src' => $url,
-        'class' => 'coassemble-embed-iframe',
-        'allow' => 'clipboard-write; fullscreen; microphone; camera',
-        'allowfullscreen' => 'allowfullscreen',
-        'title' => get_string('collection_iframe_title', 'mod_coassemble'),
+    echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
+        'label' => get_string('modulename', 'mod_coassemble'),
+        'links' => [['url' => $exiturl->out(false), 'label' => $exitlabel, 'exit' => true]],
     ]);
-    echo html_writer::end_div();
+    echo $OUTPUT->render_from_template('mod_coassemble/embed', [
+        'url' => $url,
+        'title' => get_string('collection_iframe_title', 'mod_coassemble'),
+        'allow' => 'clipboard-write; fullscreen; microphone; camera',
+        'shellclass' => 'coassemble-embed-shell--view',
+    ]);
     echo $OUTPUT->footer();
     exit;
 }
@@ -270,55 +265,51 @@ if ($mode === 'edit') {
     ]]);
 
     echo $OUTPUT->header();
-    echo html_writer::start_div('coassemble-authoring-chrome');
-    echo html_writer::link(
-        $hascourse ? $backurl : new moodle_url('/course/view.php', ['id' => $course->id]),
-        get_string('backtoactivity', 'mod_coassemble'),
-        ['class' => 'btn btn-link coassemble-exit-authoring']
-    );
-    echo html_writer::end_div();
-    echo html_writer::div('', 'coassemble-session-status', ['id' => 'coassemble-session-status']);
+    echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
+        'label' => get_string('modulename', 'mod_coassemble'),
+        'links' => [[
+            'url' => $hascourse ? $backurl->out(false) : $exiturl->out(false),
+            'label' => $hascourse ? get_string('backtoactivity', 'mod_coassemble') : $exitlabel,
+            'exit' => true,
+        ]],
+    ]);
 
     $createflows = [
         '' => get_string('flow_scratch', 'mod_coassemble'),
         'ai' => get_string('flow_ai', 'mod_coassemble'),
     ];
     if (empty($instance->coassemblecourseid)) {
-        echo html_writer::start_div('coassemble-flow-bar');
+        $flowlinks = [];
         foreach ($createflows as $fkey => $flabel) {
             $furl = new moodle_url('/mod/coassemble/view.php', [
                 'id' => $cm->id,
                 'mode' => 'edit',
                 'flow' => $fkey,
             ]);
-            $class = ($selectedflow === $fkey) ? 'btn btn-primary' : 'btn btn-secondary';
-            echo html_writer::link($furl, $flabel, ['class' => $class]);
+            $flowlinks[] = [
+                'url' => $furl->out(false),
+                'label' => $flabel,
+                'primary' => $selectedflow === $fkey,
+                'current' => $selectedflow === $fkey,
+            ];
         }
-        echo html_writer::end_div();
+        echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
+            'label' => get_string('flow', 'mod_coassemble'),
+            'class' => 'coassemble-flow-bar',
+            'links' => $flowlinks,
+        ]);
     }
 
-    echo html_writer::start_div('coassemble-embed-shell coassemble-embed-shell--edit');
-    echo html_writer::tag('iframe', '', [
-        'id' => 'coassemble-embed-frame',
-        'src' => $embed['url'],
-        'class' => 'coassemble-embed-iframe',
-        'allow' => 'clipboard-write; fullscreen; microphone; camera',
-        'allowfullscreen' => 'allowfullscreen',
+    echo $OUTPUT->render_from_template('mod_coassemble/embed', [
+        'url' => $embed['url'],
         'title' => get_string('builder_iframe_title', 'mod_coassemble'),
+        'allow' => 'clipboard-write; fullscreen; microphone; camera',
+        'shellclass' => 'coassemble-embed-shell--edit',
+        'resolve' => !$hascourse,
+        'resolveurl' => (new moodle_url('/mod/coassemble/view.php'))->out(false),
+        'cmid' => (int) $cm->id,
+        'sesskey' => sesskey(),
     ]);
-    echo html_writer::end_div();
-    if (!$hascourse) {
-        echo html_writer::start_tag('form', [
-            'id' => 'coassemble-resolve-form',
-            'method' => 'post',
-            'action' => (new moodle_url('/mod/coassemble/view.php'))->out(false),
-            'hidden' => 'hidden',
-        ]);
-        foreach (['id' => $cm->id, 'resolve' => 1, 'sesskey' => sesskey()] as $name => $value) {
-            echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
-        }
-        echo html_writer::end_tag('form');
-    }
     echo $OUTPUT->footer();
     exit;
 }
@@ -401,8 +392,8 @@ $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [$jsconfig]);
 
 echo $OUTPUT->header();
 
-// Slim chrome bar: back link for everyone, management links for authors.
-$chromelinks = html_writer::link($exiturl, $exitlabel, ['class' => 'btn btn-link coassemble-exit-authoring']);
+// Keep course navigation available alongside the embedded activity.
+$chromelinks = [['url' => $exiturl->out(false), 'label' => $exitlabel, 'exit' => true]];
 if ($canauthor) {
     $remote = null;
     try {
@@ -415,40 +406,31 @@ if ($canauthor) {
         // Non-fatal for the player chrome.
         $remote = null;
     }
-    $chromelinks .= html_writer::link(
-        new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'mode' => 'edit']),
-        get_string('nav_editcontent', 'mod_coassemble'),
-        ['class' => 'btn btn-secondary btn-sm mr-1']
-    ) .
-    html_writer::link(
-        new moodle_url('/mod/coassemble/manage.php', ['id' => $cm->id]),
-        get_string('nav_manage', 'mod_coassemble'),
-        ['class' => 'btn btn-secondary btn-sm mr-1']
-    ) .
-    html_writer::link(
-        new moodle_url('/mod/coassemble/report.php', ['id' => $cm->id]),
-        get_string('nav_report', 'mod_coassemble'),
-        ['class' => 'btn btn-secondary btn-sm mr-1']
-    ) .
-    html_writer::link(
-        new moodle_url('/mod/coassemble/analytics.php', ['id' => $cm->id]),
-        get_string('nav_analytics', 'mod_coassemble'),
-        ['class' => 'btn btn-secondary btn-sm']
-    );
+    $actions = [
+        ['view.php', 'nav_editcontent', ['mode' => 'edit']],
+        ['manage.php', 'nav_manage', []],
+        ['report.php', 'nav_report', []],
+        ['analytics.php', 'nav_analytics', []],
+    ];
+    foreach ($actions as [$page, $label, $params]) {
+        $chromelinks[] = [
+            'url' => (new moodle_url('/mod/coassemble/' . $page, ['id' => $cm->id] + $params))->out(false),
+            'label' => get_string($label, 'mod_coassemble'),
+        ];
+    }
 }
-echo html_writer::div($chromelinks, 'coassemble-authoring-chrome coassemble-player-chrome');
+echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
+    'label' => get_string('modulename', 'mod_coassemble'),
+    'class' => 'coassemble-player-chrome',
+    'links' => $chromelinks,
+]);
 if ($canauthor && !empty($remote) && empty($remote['published'])) {
     echo $OUTPUT->notification(get_string('status_unpublished', 'mod_coassemble'), 'warning');
 }
-echo html_writer::div('', 'coassemble-session-status', ['id' => 'coassemble-session-status']);
-echo html_writer::start_div('coassemble-embed-shell coassemble-embed-shell--view');
-echo html_writer::tag('iframe', '', [
-    'id' => 'coassemble-embed-frame',
-    'src' => $embed['url'],
-    'class' => 'coassemble-embed-iframe',
-    'allow' => 'clipboard-write; fullscreen; microphone; camera',
-    'allowfullscreen' => 'allowfullscreen',
+echo $OUTPUT->render_from_template('mod_coassemble/embed', [
+    'url' => $embed['url'],
     'title' => get_string('player_iframe_title', 'mod_coassemble'),
+    'allow' => 'clipboard-write; fullscreen; microphone; camera',
+    'shellclass' => 'coassemble-embed-shell--view',
 ]);
-echo html_writer::end_div();
 echo $OUTPUT->footer();
