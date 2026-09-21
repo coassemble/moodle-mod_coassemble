@@ -98,9 +98,10 @@ class client {
             $courses = $this->list_courses(['length' => 1]);
             $count = is_array($courses) ? count($courses) : 0;
         } catch (\Throwable $e) {
+            \mod_coassemble\local\diagnostics::log($e, 'client');
             return [
                 'ok' => false,
-                'message' => $e->getMessage(),
+                'message' => get_string('error_apirequest', 'mod_coassemble'),
                 'list_ok' => false,
                 'authoring_ok' => false,
             ];
@@ -123,12 +124,13 @@ class client {
                     $this->delete_course((int) $embed['courseid']);
                 } catch (\Throwable $ignore) {
                     // Probe course left soft-deleted-or-not; non-fatal for the test.
-                    debugging('Probe course cleanup failed: ' . $ignore->getMessage(), DEBUG_DEVELOPER);
+                    \mod_coassemble\local\diagnostics::log($ignore, 'probe_cleanup');
                 }
             }
             $authoringmessage = get_string('connection_authoring_ok', 'mod_coassemble');
         } catch (\Throwable $e) {
-            $authoringmessage = $e->getMessage();
+            \mod_coassemble\local\diagnostics::log($e, 'client');
+            $authoringmessage = get_string('error_apirequest', 'mod_coassemble');
         }
 
         if (!$authoringok) {
@@ -520,17 +522,10 @@ class client {
         $httpcode = (int) ($info['http_code'] ?? 0);
         $errno = method_exists($curl, 'get_errno') ? $curl->get_errno() : 0;
 
-        if ($errno) {
-            $err = property_exists($curl, 'error') ? $curl->error : 'curl error';
-            throw new \moodle_exception('error_apirequest', 'mod_coassemble', '', $err);
-        }
-
-        if ($httpcode < 200 || $httpcode >= 300) {
-            $message = self::extract_error_message((string) $response);
-            if ($message === null) {
-                $message = 'HTTP ' . $httpcode;
-            }
-            throw new \moodle_exception('error_apirequest', 'mod_coassemble', '', $message);
+        if ($errno || $httpcode < 200 || $httpcode >= 300) {
+            // Never log headers, query parameters, signed URLs or response bodies.
+            \mod_coassemble\local\diagnostics::record($method . ' ' . $path, '', $httpcode, $errno);
+            throw new \moodle_exception('error_apirequest', 'mod_coassemble');
         }
 
         if ($rawbinary) {
@@ -553,30 +548,11 @@ class client {
         }
 
         if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
-            throw new \moodle_exception('error_apirequest', 'mod_coassemble', '', 'Invalid JSON response');
+            \mod_coassemble\local\diagnostics::record('invalid_json');
+            throw new \moodle_exception('error_apirequest', 'mod_coassemble');
         }
 
         return $decoded;
-    }
-
-    /**
-     * Pull a human-readable error message out of an API response body.
-     *
-     * @param string $response
-     * @return string|null
-     */
-    private static function extract_error_message($response) {
-        $decoded = json_decode($response, true);
-        if (!is_array($decoded)) {
-            return null;
-        }
-        if (isset($decoded['message']) && is_string($decoded['message'])) {
-            return $decoded['message'];
-        }
-        if (isset($decoded['error']['message']) && is_string($decoded['error']['message'])) {
-            return $decoded['error']['message'];
-        }
-        return null;
     }
 
     /**

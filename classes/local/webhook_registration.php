@@ -86,7 +86,8 @@ class webhook_registration {
 
             return ['status' => self::STATUS_REGISTERED, 'message' => ''];
         } catch (\Throwable $e) {
-            return ['status' => self::STATUS_FAILED, 'message' => $e->getMessage()];
+            \mod_coassemble\local\diagnostics::log($e, 'webhook_registration');
+            return ['status' => self::STATUS_FAILED, 'message' => get_string('error_apirequest', 'mod_coassemble')];
         }
     }
 }

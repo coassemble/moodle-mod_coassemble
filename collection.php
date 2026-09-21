@@ -64,8 +64,9 @@ $body = [
 try {
     $url = $client->issue_collection_embed($body);
 } catch (Throwable $e) {
+    \mod_coassemble\local\diagnostics::log($e, 'collection');
     echo $OUTPUT->header();
-    echo $OUTPUT->notification($e->getMessage(), 'error');
+    echo $OUTPUT->notification(get_string('error_apirequest', 'mod_coassemble'), 'error');
     echo $OUTPUT->footer();
     exit;
 }

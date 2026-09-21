@@ -113,7 +113,8 @@ if ($action !== '') {
                 redirect($PAGE->url);
         }
     } catch (Throwable $e) {
-        redirect($PAGE->url, $e->getMessage(), null, \core\output\notification::NOTIFY_ERROR);
+        \mod_coassemble\local\diagnostics::log($e, 'manage');
+        redirect($PAGE->url, get_string('error_apirequest', 'mod_coassemble'), null, \core\output\notification::NOTIFY_ERROR);
     }
 }
 
@@ -126,7 +127,8 @@ if (!empty($instance->coassemblecourseid) && $client->is_configured()) {
             'clientIdentifier' => $clientidentifier,
         ]);
     } catch (Throwable $e) {
-        $remoteerror = $e->getMessage();
+        \mod_coassemble\local\diagnostics::log($e, 'manage');
+        $remoteerror = get_string('error_apirequest', 'mod_coassemble');
     }
 }
 

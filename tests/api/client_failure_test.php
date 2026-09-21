@@ -1,0 +1,61 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+namespace mod_coassemble\api;
+
+/**
+ * Failed connection tests must not expose upstream exception text.
+ *
+ * @package   mod_coassemble
+ * @copyright 2026 Coassemble
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers \mod_coassemble\api\client
+ */
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\api\client::class)]
+final class client_failure_test extends \advanced_testcase {
+    /**
+     * List failures are generic in the admin connection-test result.
+     */
+    public function test_connection_list_failure_is_generic(): void {
+        $this->resetAfterTest();
+        $this->redirectEvents();
+        $client = $this->getMockBuilder(client::class)
+            ->setConstructorArgs(['https://example.com', 'test-key'])
+            ->onlyMethods(['list_courses'])->getMock();
+        $client->method('list_courses')->willThrowException(new \RuntimeException('secret-token'));
+        $result = $client->test_connection();
+        $this->assertFalse($result['ok']);
+        $this->assertSame(get_string('error_apirequest', 'mod_coassemble'), $result['message']);
+        $this->assertStringNotContainsString('secret-token', json_encode($result));
+    }
+
+    /**
+     * Authoring failures must not return raw diagnostics after list access succeeds.
+     */
+    public function test_connection_authoring_failure_is_generic(): void {
+        $this->resetAfterTest();
+        $this->redirectEvents();
+        $client = $this->getMockBuilder(client::class)
+            ->setConstructorArgs(['https://example.com', 'test-key'])
+            ->onlyMethods(['list_courses', 'issue_course_embed'])->getMock();
+        $client->method('list_courses')->willReturn([]);
+        $client->method('issue_course_embed')->willThrowException(new \RuntimeException('secret-token'));
+        $result = $client->test_connection();
+        $this->assertFalse($result['ok']);
+        $this->assertTrue($result['list_ok']);
+        $this->assertStringNotContainsString('secret-token', json_encode($result));
+    }
+}

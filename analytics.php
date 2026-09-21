@@ -103,8 +103,9 @@ try {
         ]);
     }
 } catch (Throwable $e) {
+    \mod_coassemble\local\diagnostics::log($e, 'analytics');
     echo $OUTPUT->header();
-    echo $OUTPUT->notification($e->getMessage(), 'error');
+    echo $OUTPUT->notification(get_string('error_apirequest', 'mod_coassemble'), 'error');
     echo $OUTPUT->footer();
     exit;
 }

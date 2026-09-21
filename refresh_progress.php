@@ -80,9 +80,10 @@ try {
         $updated++;
     }
 } catch (Throwable $e) {
+    \mod_coassemble\local\diagnostics::log($e, 'refresh_progress');
     redirect(
         new moodle_url('/mod/coassemble/manage.php', ['id' => $cm->id]),
-        $e->getMessage(),
+        get_string('error_apirequest', 'mod_coassemble'),
         null,
         \core\output\notification::NOTIFY_ERROR
     );

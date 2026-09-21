@@ -107,12 +107,22 @@ $displayname = \mod_coassemble\local\identity::display_name($USER);
 $avatar = \mod_coassemble\local\identity::avatar_url($USER);
 
 if ($resolve && $canauthor && !$hascourse) {
-    $instance = \mod_coassemble\local\course_link::resolve_from_api(
-        $instance,
-        $client,
-        $identifier,
-        $clientidentifier
-    );
+    try {
+        $instance = \mod_coassemble\local\course_link::resolve_from_api(
+            $instance,
+            $client,
+            $identifier,
+            $clientidentifier
+        );
+    } catch (Throwable $e) {
+        \mod_coassemble\local\diagnostics::log($e, 'resolve');
+        redirect(
+            new moodle_url('/mod/coassemble/manage.php', ['id' => $cm->id]),
+            get_string('error_apirequest', 'mod_coassemble'),
+            null,
+            \core\output\notification::NOTIFY_ERROR
+        );
+    }
     $hascourse = !empty($instance->coassemblecourseid);
     if ($hascourse) {
         redirect(new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'mode' => 'view']));
@@ -152,8 +162,9 @@ if ($mode === 'collection') {
             'options' => ['back' => 'event'],
         ]);
     } catch (Throwable $e) {
+        \mod_coassemble\local\diagnostics::log($e, 'view');
         echo $OUTPUT->header();
-        echo $OUTPUT->notification($e->getMessage(), 'error');
+        echo $OUTPUT->notification(get_string('error_apirequest', 'mod_coassemble'), 'error');
         echo $OUTPUT->footer();
         exit;
     }
@@ -224,8 +235,9 @@ if ($mode === 'edit') {
     try {
         $embed = $client->issue_course_embed($body);
     } catch (Throwable $e) {
+        \mod_coassemble\local\diagnostics::log($e, 'view');
         echo $OUTPUT->header();
-        echo $OUTPUT->notification($e->getMessage(), 'error');
+        echo $OUTPUT->notification(get_string('error_apirequest', 'mod_coassemble'), 'error');
         echo $OUTPUT->footer();
         exit;
     }
@@ -349,8 +361,9 @@ if (!empty($instance->language)) {
 try {
     $embed = $client->issue_course_embed($body);
 } catch (Throwable $e) {
+    \mod_coassemble\local\diagnostics::log($e, 'view');
     echo $OUTPUT->header();
-    echo $OUTPUT->notification($e->getMessage(), 'error');
+    echo $OUTPUT->notification(get_string('error_apirequest', 'mod_coassemble'), 'error');
     echo $OUTPUT->footer();
     exit;
 }
@@ -386,6 +399,7 @@ if ($canauthor) {
             'clientIdentifier' => $clientidentifier,
         ]);
     } catch (Throwable $e) {
+        \mod_coassemble\local\diagnostics::log($e, 'view');
         // Non-fatal for the player chrome.
         $remote = null;
     }
