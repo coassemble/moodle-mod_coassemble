@@ -69,6 +69,87 @@ class course_link {
     }
 
     /**
+     * Count other activities using this remote course, across the Moodle site.
+     *
+     * @param \stdClass $instance Activity
+     * @return int
+     */
+    public static function other_uses(\stdClass $instance): int {
+        global $DB;
+        if (empty($instance->coassemblecourseid)) {
+            return 0;
+        }
+        return $DB->count_records_select(
+            'coassemble',
+            'coassemblecourseid = ? AND id <> ?',
+            [(int) $instance->coassemblecourseid, (int) $instance->id]
+        );
+    }
+
+    /**
+     * Detach content and clear local results belonging to that content.
+     *
+     * @param \stdClass $instance Activity
+     * @return \stdClass
+     */
+    public static function unlink(\stdClass $instance): \stdClass {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/mod/coassemble/lib.php');
+        $transaction = $DB->start_delegated_transaction();
+        $instance->coassemblecourseid = null;
+        $instance->timeauthored = null;
+        $instance->linkmode = 'created';
+        // Revisiting the empty activity should offer a choice, not create a stub.
+        $instance->flow = 'existing';
+        $instance->timemodified = time();
+        $DB->update_record('coassemble', $instance);
+        $DB->delete_records('coassemble_track', ['coassembleid' => $instance->id]);
+        coassemble_grade_item_update($instance, 'reset');
+        $cm = get_coursemodule_from_instance('coassemble', $instance->id);
+        if ($cm) {
+            $completion = new \completion_info(get_course($instance->course));
+            $completion->delete_all_state($cm);
+        }
+        $transaction->allow_commit();
+        rebuild_course_cache((int) $instance->course, true);
+        return $instance;
+    }
+
+    /**
+     * Delete only an owned course which no other activity currently uses.
+     *
+     * @param \stdClass $instance Activity
+     * @param \mod_coassemble\api\client $client API client
+     * @return \stdClass
+     */
+    public static function delete_remote(\stdClass $instance, \mod_coassemble\api\client $client): \stdClass {
+        global $DB;
+        $courseid = (int) $instance->coassemblecourseid;
+        $factory = \core\lock\lock_config::get_lock_factory('mod_coassemble');
+        $lock = $factory->get_lock('course:' . $courseid, 10);
+        if (!$lock) {
+            throw new \moodle_exception('locktimeout');
+        }
+        try {
+            $instance = $DB->get_record('coassemble', ['id' => $instance->id], '*', MUST_EXIST);
+            if (empty($courseid) || (int) $instance->coassemblecourseid !== $courseid) {
+                throw new \moodle_exception('error_coursechanged', 'mod_coassemble');
+            }
+            if (!in_array($instance->linkmode, ['created', 'copied'], true)) {
+                throw new \moodle_exception('manage_delete_linked', 'mod_coassemble');
+            }
+            $others = self::other_uses($instance);
+            if ($others) {
+                throw new \moodle_exception('manage_delete_shared', 'mod_coassemble', '', $others);
+            }
+            $client->delete_course($courseid);
+            return self::unlink($instance);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
      * Fallback: find the newest Headless course for this author + tenant and link it.
      *
      * Used when JWT decode failed and no course.updated event arrived.

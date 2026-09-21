@@ -142,3 +142,16 @@ $string['webhook_auto_needshttps'] = 'Webhooks require this Moodle site to be se
 $string['webhook_auto_ok'] = 'Webhook registered automatically — learner progress will sync in near real time.';
 $string['webhook_status'] = 'Webhook registration';
 $string['webhook_status_ok'] = 'Webhook is registered and its signing secret is stored.';
+
+$string['linkmode'] = 'Course relationship';
+$string['linkmode_created'] = 'Created by this activity';
+$string['linkmode_copied'] = 'Copied for this activity';
+$string['linkmode_linked'] = 'Linked — also used by {$a} other activities';
+$string['manage_shared'] = 'Shared course';
+$string['manage_delete_linked'] = 'This activity links to a shared Coassemble course. Use Unlink to detach it without deleting the original.';
+$string['manage_delete_shared'] = 'This course is also used by {$a} other activities. Unlink this activity instead of deleting the course.';
+$string['manage_delete_confirm'] = 'Delete this course in Coassemble and clear this activity’s local progress, grades and completion?';
+$string['manage_unlink'] = 'Unlink';
+$string['manage_unlink_confirm'] = 'Unlink this course and clear this activity’s local progress, grades and completion? The original Coassemble course and its learner records will remain unchanged.';
+$string['manage_unlink_ok'] = 'Course unlinked. The original course in Coassemble is unchanged.';
+$string['library_link_help'] = 'Linking uses the original course. Edits and publishing changes made here affect every activity using it and the Coassemble workspace.';

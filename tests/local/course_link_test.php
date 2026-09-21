@@ -56,4 +56,90 @@ final class course_link_test extends \advanced_testcase {
         $this->expectException(\coding_exception::class);
         course_link::persist($instance, 123, '', 'unknown');
     }
+    /**
+     * Linked originals cannot be deleted even when they are the only local use.
+     */
+    public function test_linked_course_cannot_be_deleted(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $instance = $this->getDataGenerator()->create_module('coassemble', [
+            'course' => $course->id, 'coassemblecourseid' => 123, 'linkmode' => 'linked',
+        ]);
+        $client = $this->createMock(\mod_coassemble\api\client::class);
+        $client->expects($this->never())->method('delete_course');
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('manage_delete_linked', 'mod_coassemble'));
+        course_link::delete_remote($instance, $client);
+    }
+
+    /**
+     * Uses in a different Moodle course also prevent remote deletion.
+     */
+    public function test_shared_owned_course_cannot_be_deleted(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $othercourse = $this->getDataGenerator()->create_course();
+        $instance = $this->getDataGenerator()->create_module('coassemble', [
+            'course' => $course->id, 'coassemblecourseid' => 123, 'linkmode' => 'copied',
+        ]);
+        $this->getDataGenerator()->create_module('coassemble', [
+            'course' => $othercourse->id, 'coassemblecourseid' => 123, 'linkmode' => 'linked',
+        ]);
+        $this->assertSame(1, course_link::other_uses($instance));
+        $client = $this->createMock(\mod_coassemble\api\client::class);
+        $client->expects($this->never())->method('delete_course');
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('manage_delete_shared', 'mod_coassemble', 1));
+        course_link::delete_remote($instance, $client);
+    }
+
+    /**
+     * Deleting an exclusively owned course clears its link and local results.
+     */
+    public function test_owned_delete_clears_results(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/mod/coassemble/lib.php');
+        require_once($CFG->libdir . '/gradelib.php');
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course(['enablecompletion' => 1]);
+        $instance = $this->getDataGenerator()->create_module('coassemble', [
+            'course' => $course->id, 'coassemblecourseid' => 123, 'linkmode' => 'created',
+            'completion' => COMPLETION_TRACKING_AUTOMATIC, 'completioncourse' => 1,
+        ]);
+        $user = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($user->id, $course->id, 'student');
+        coassemble_record_progress($instance, $user->id, 100, true);
+        $client = $this->createMock(\mod_coassemble\api\client::class);
+        $client->expects($this->once())->method('delete_course')->with(123)->willReturn([]);
+        $result = course_link::delete_remote($instance, $client);
+        $this->assertNull($result->coassemblecourseid);
+        $this->assertSame('existing', $result->flow);
+        $this->assertFalse($DB->record_exists('coassemble_track', ['coassembleid' => $instance->id]));
+        $grades = grade_get_grades($course->id, 'mod', 'coassemble', $instance->id, $user->id);
+        $item = reset($grades->items);
+        $this->assertNull($item->grades[$user->id]->grade);
+        $cm = get_coursemodule_from_instance('coassemble', $instance->id);
+        $this->assertFalse($DB->record_exists('course_modules_completion', ['coursemoduleid' => $cm->id]));
+    }
+
+    /**
+     * An upstream delete failure must retain the local link and ownership.
+     */
+    public function test_failed_delete_keeps_link(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $instance = $this->getDataGenerator()->create_module('coassemble', [
+            'course' => $course->id, 'coassemblecourseid' => 123, 'linkmode' => 'copied',
+        ]);
+        $client = $this->createMock(\mod_coassemble\api\client::class);
+        $client->method('delete_course')->willThrowException(new \RuntimeException('Failed'));
+        try {
+            course_link::delete_remote($instance, $client);
+            $this->fail('Expected deletion failure');
+        } catch (\RuntimeException $e) {
+            $this->assertEquals(123, $DB->get_field('coassemble', 'coassemblecourseid', ['id' => $instance->id]));
+        }
+    }
 }

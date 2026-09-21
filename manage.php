@@ -27,6 +27,7 @@ require_once(__DIR__ . '/lib.php');
 
 $id = required_param('id', PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
+$confirmed = optional_param('confirmed', 0, PARAM_BOOL);
 
 [$course, $cm] = get_course_and_cm_from_cmid($id, 'coassemble');
 $instance = $DB->get_record('coassemble', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -49,6 +50,22 @@ if ($action !== '') {
         redirect($PAGE->url, get_string('error_nocourseyet', 'mod_coassemble'), null, \core\output\notification::NOTIFY_ERROR);
     }
 
+    if (in_array($action, ['delete', 'unlink'], true) && !$confirmed) {
+        echo $OUTPUT->header();
+        echo $OUTPUT->confirm(
+            get_string('manage_' . $action . '_confirm', 'mod_coassemble'),
+            new single_button(
+                new moodle_url('/mod/coassemble/manage.php', [
+                'id' => $id, 'action' => $action, 'confirmed' => 1,
+                ]),
+                get_string('continue'),
+                'post'
+            ),
+            $PAGE->url
+        );
+        echo $OUTPUT->footer();
+        exit;
+    }
     $courseid = (int) $instance->coassemblecourseid;
     try {
         switch ($action) {
@@ -65,23 +82,20 @@ if ($action !== '') {
                     'identifier' => $identifier,
                     'clientIdentifier' => $clientidentifier,
                 ]);
-                if (!empty($dup['id'])) {
-                    $instance->coassemblecourseid = (int) $dup['id'];
-                    if (!empty($dup['title'])) {
-                        $instance->name = $dup['title'];
-                    }
-                    $instance->timemodified = time();
-                    $DB->update_record('coassemble', $instance);
+                if (empty($dup['id']) || (int) $dup['id'] === $courseid) {
+                    throw new moodle_exception('error_apirequest', 'mod_coassemble');
                 }
+                $instance = \mod_coassemble\local\course_link::unlink($instance);
+                $instance = \mod_coassemble\local\course_link::persist($instance, (int) $dup['id'], '', 'copied');
                 redirect($PAGE->url, get_string('manage_duplicate_ok', 'mod_coassemble'));
                 break;
             case 'delete':
-                $client->delete_course($courseid);
-                // Unlink so learners are not launched against a soft-deleted course.
-                $instance->coassemblecourseid = null;
-                $instance->timemodified = time();
-                $DB->update_record('coassemble', $instance);
+                \mod_coassemble\local\course_link::delete_remote($instance, $client);
                 redirect($PAGE->url, get_string('manage_delete_ok', 'mod_coassemble'));
+                break;
+            case 'unlink':
+                \mod_coassemble\local\course_link::unlink($instance);
+                redirect($PAGE->url, get_string('manage_unlink_ok', 'mod_coassemble'));
                 break;
             case 'restore':
                 $client->restore_course($courseid);
@@ -112,7 +126,17 @@ if ($action !== '') {
         }
     } catch (Throwable $e) {
         \mod_coassemble\local\diagnostics::log($e, 'manage');
-        redirect($PAGE->url, get_string('error_apirequest', 'mod_coassemble'), null, \core\output\notification::NOTIFY_ERROR);
+        $message = get_string('error_apirequest', 'mod_coassemble');
+        if (
+            $e instanceof moodle_exception && in_array(
+                $e->errorcode,
+                ['manage_delete_linked', 'manage_delete_shared', 'error_coursechanged'],
+                true
+            )
+        ) {
+            $message = get_string($e->errorcode, 'mod_coassemble', $e->a);
+        }
+        redirect($PAGE->url, $message, null, \core\output\notification::NOTIFY_ERROR);
     }
 }
 
@@ -134,6 +158,9 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('nav_manage', 'mod_coassemble'));
 
 echo html_writer::tag('p', get_string('manage_intro', 'mod_coassemble'));
+if (!empty($instance->coassemblecourseid) && $instance->linkmode === 'linked') {
+    echo $OUTPUT->notification(get_string('library_link_help', 'mod_coassemble'), 'warning');
+}
 
 if (!empty($remoteerror)) {
     echo $OUTPUT->notification($remoteerror, 'error');
@@ -149,6 +176,15 @@ $table = new html_table();
 $table->attributes['class'] = 'generaltable';
 $table->data = [];
 $table->data[] = [get_string('name'), format_string($instance->name)];
+$otheruses = \mod_coassemble\local\course_link::other_uses($instance);
+if (!empty($instance->coassemblecourseid)) {
+    $table->data[] = [get_string('linkmode', 'mod_coassemble'),
+        get_string('linkmode_' . $instance->linkmode, 'mod_coassemble', $otheruses)];
+    if ($instance->linkmode !== 'linked' && $otheruses) {
+        $table->data[] = [get_string('manage_shared', 'mod_coassemble'),
+            get_string('manage_delete_shared', 'mod_coassemble', $otheruses)];
+    }
+}
 $table->data[] = [
     get_string('coassemblecourseid', 'mod_coassemble'),
     $instance->coassemblecourseid ? (int) $instance->coassemblecourseid : get_string('notyetlinked', 'mod_coassemble'),
@@ -174,7 +210,10 @@ echo html_writer::table($table);
 
 if (!empty($instance->coassemblecourseid)) {
     echo html_writer::start_div('coassemble-manage-actions');
-    $actions = ['publish', 'revert', 'duplicate', 'delete', 'restore', 'refresh'];
+    $actions = ['publish', 'revert', 'duplicate', 'unlink', 'restore', 'refresh'];
+    if (in_array($instance->linkmode, ['created', 'copied'], true) && !$otheruses) {
+        $actions[] = 'delete';
+    }
     foreach ($actions as $act) {
         $url = new moodle_url('/mod/coassemble/manage.php', [
             'id' => $cm->id,
