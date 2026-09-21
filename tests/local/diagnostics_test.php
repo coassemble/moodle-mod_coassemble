@@ -16,6 +16,8 @@
 
 namespace mod_coassemble\local;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\local\diagnostics::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\event\api_request_failed::class)]
 /**
  * Ensure service diagnostics cannot disclose upstream payloads or credentials.
  *
@@ -25,8 +27,6 @@ namespace mod_coassemble\local;
  * @covers \mod_coassemble\local\diagnostics
  * @covers \mod_coassemble\event\api_request_failed
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\local\diagnostics::class)]
-#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\event\api_request_failed::class)]
 final class diagnostics_test extends \advanced_testcase {
     /**
      * Log the failure without the untrusted message or trace, even with debugging enabled.

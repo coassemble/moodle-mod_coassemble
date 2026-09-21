@@ -16,6 +16,7 @@
 
 namespace mod_coassemble\api;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\api\client::class)]
 /**
  * Failed connection tests must not expose upstream exception text.
  *
@@ -24,7 +25,6 @@ namespace mod_coassemble\api;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \mod_coassemble\api\client
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\api\client::class)]
 final class client_failure_test extends \advanced_testcase {
     /**
      * List failures are generic in the admin connection-test result.

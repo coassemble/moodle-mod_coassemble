@@ -8,7 +8,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        image: postgres:${{ matrix.moodle-branch == 'main' && '17' || '16' }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: trust

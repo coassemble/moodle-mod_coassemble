@@ -16,6 +16,7 @@
 
 namespace mod_coassemble\external;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\external\update_course::class)]
 /**
  * Tests for the update_course external function.
  *
@@ -24,7 +25,6 @@ namespace mod_coassemble\external;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \mod_coassemble\external\update_course
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\external\update_course::class)]
 final class update_course_test extends \advanced_testcase {
     /**
      * Create a course, an unlinked activity and return the cm record.

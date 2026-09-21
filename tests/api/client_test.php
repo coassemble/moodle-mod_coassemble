@@ -16,6 +16,7 @@
 
 namespace mod_coassemble\api;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\api\client::class)]
 /**
  * Tests for API key handling.
  *
@@ -24,7 +25,6 @@ namespace mod_coassemble\api;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \mod_coassemble\api\client
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\api\client::class)]
 final class client_test extends \basic_testcase {
     /**
      * Pasted keys are normalised to the full COASSEMBLE:{workspace}:{secret} form.

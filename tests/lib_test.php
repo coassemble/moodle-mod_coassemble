@@ -22,6 +22,9 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/coassemble/lib.php');
 require_once($CFG->libdir . '/gradelib.php');
 
+#[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_record_progress')]
+#[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_update_grades')]
+#[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_reset_userdata')]
 /**
  * Tests for progress recording, grading and course reset.
  *
@@ -32,9 +35,6 @@ require_once($CFG->libdir . '/gradelib.php');
  * @covers ::coassemble_update_grades
  * @covers ::coassemble_reset_userdata
  */
-#[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_record_progress')]
-#[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_update_grades')]
-#[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_reset_userdata')]
 final class lib_test extends \advanced_testcase {
     /**
      * Create course, activity and enrolled user.

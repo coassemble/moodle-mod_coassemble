@@ -16,6 +16,7 @@
 
 namespace mod_coassemble\local;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\local\action::class)]
 /**
  * Form submission security tests.
  *
@@ -24,7 +25,6 @@ namespace mod_coassemble\local;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers \mod_coassemble\local\action
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\mod_coassemble\local\action::class)]
 final class action_test extends \advanced_testcase {
     /**
      * Restore request globals after each test.

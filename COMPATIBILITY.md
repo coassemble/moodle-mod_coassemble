@@ -22,8 +22,8 @@ As of 21 September 2026, maintained Moodle releases are 4.5, 5.0, 5.1 and 5.2;
 5.3 is scheduled for 5 October 2026. See the official
 [release schedule](https://moodledev.io/general/releases).
 Older branches are retained for existing installations; new sites should use a
-maintained Moodle release and its supported PHP version. CI uses PostgreSQL 16
-and MariaDB 10.11. Bootstrap spacing uses plugin-scoped logical CSS properties,
+maintained Moodle release and its supported PHP version. CI uses PostgreSQL 16 for stable branches, PostgreSQL 17 for the development
+branch, and MariaDB 10.11. Bootstrap spacing uses plugin-scoped logical CSS properties,
 so it works on both Bootstrap 4 and Bootstrap 5 without deprecated utilities.
 
 ## Coassemble API
