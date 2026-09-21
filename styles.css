@@ -59,3 +59,12 @@
     background: #fef2f2;
     color: #991b1b;
 }
+
+.path-mod-coassemble .coassemble-library-thumbnail {
+    object-fit: cover;
+}
+
+.path-mod-coassemble .coassemble-library-unavailable {
+    color: #595959;
+    background: #f2f2f2;
+}

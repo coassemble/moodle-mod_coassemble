@@ -1,0 +1,37 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_coassemble/library_search
+
+    Search the workspace library. Submitting a search resets the current page.
+
+    Context variables required for this template:
+    * url - Library URL
+    * id - Optional activity module id
+    * courseid - Moodle course id
+    * title - Current search
+
+    Example context (json):
+    {"url": "/mod/coassemble/library.php", "id": 0, "courseid": 2, "title": "Safety"}
+}}
+<form method="get" action="{{url}}" class="coassemble-toolbar">
+    <input type="hidden" name="id" value="{{id}}">
+    <input type="hidden" name="courseid" value="{{courseid}}">
+    <label for="coassemble-library-search">{{#str}}library_search, mod_coassemble{{/str}}</label>
+    <input type="search" id="coassemble-library-search" name="title" value="{{title}}" class="form-control w-auto">
+    <button type="submit" class="btn btn-primary">{{#str}}search{{/str}}</button>
+</form>

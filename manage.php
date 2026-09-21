@@ -109,10 +109,7 @@ if ($action !== '') {
             case 'refresh':
                 // Pull latest title from Headless when linked.
                 if (!empty($instance->coassemblecourseid)) {
-                    $remote = $client->get_course((int) $instance->coassemblecourseid, [
-                        'identifier' => $identifier,
-                        'clientIdentifier' => $clientidentifier,
-                    ]);
+                    $remote = $client->get_course((int) $instance->coassemblecourseid);
                     if (!empty($remote['title'])) {
                         $instance->name = $remote['title'];
                         $instance->timemodified = time();
@@ -144,10 +141,7 @@ $remote = null;
 $remoteerror = '';
 if (!empty($instance->coassemblecourseid) && $client->is_configured()) {
     try {
-        $remote = $client->get_course((int) $instance->coassemblecourseid, [
-            'identifier' => $identifier,
-            'clientIdentifier' => $clientidentifier,
-        ]);
+        $remote = $client->get_course((int) $instance->coassemblecourseid);
     } catch (Throwable $e) {
         \mod_coassemble\local\diagnostics::log($e, 'manage');
         $remoteerror = get_string('error_apirequest', 'mod_coassemble');

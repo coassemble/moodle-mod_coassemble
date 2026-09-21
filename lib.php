@@ -546,3 +546,22 @@ function coassemble_get_instances($courseid) {
     global $DB;
     return $DB->get_records('coassemble', ['course' => $courseid], 'name ASC');
 }
+
+/**
+ * Offer workspace browsing even before a Coassemble activity has been added.
+ *
+ * @param navigation_node $navigation Course settings node
+ * @param stdClass $course Moodle course
+ * @param context_course $context Course context
+ */
+function mod_coassemble_extend_navigation_course($navigation, $course, $context) {
+    if (has_capability('mod/coassemble:addinstance', $context)) {
+        $navigation->add(
+            get_string('library', 'mod_coassemble'),
+            new moodle_url('/mod/coassemble/library.php', ['courseid' => $course->id]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'coassemblelibrary'
+        );
+    }
+}

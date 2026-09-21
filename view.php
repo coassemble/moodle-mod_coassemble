@@ -397,10 +397,7 @@ $chromelinks = [['url' => $exiturl->out(false), 'label' => $exitlabel, 'exit' =>
 if ($canauthor) {
     $remote = null;
     try {
-        $remote = $client->get_course((int) $instance->coassemblecourseid, [
-            'identifier' => $identifier,
-            'clientIdentifier' => $clientidentifier,
-        ]);
+        $remote = $client->get_course((int) $instance->coassemblecourseid);
     } catch (Throwable $e) {
         \mod_coassemble\local\diagnostics::log($e, 'view');
         // Non-fatal for the player chrome.
