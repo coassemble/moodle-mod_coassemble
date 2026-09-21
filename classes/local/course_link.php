@@ -34,9 +34,10 @@ class course_link {
      * @param \stdClass $instance
      * @param int $courseid
      * @param string $title
+     * @param string|null $linkmode Explicit origin, or preserve the existing origin for the same course
      * @return \stdClass Updated instance
      */
-    public static function persist(\stdClass $instance, $courseid, $title = '') {
+    public static function persist(\stdClass $instance, $courseid, $title = '', ?string $linkmode = null) {
         global $DB;
 
         $courseid = (int) $courseid;
@@ -45,6 +46,11 @@ class course_link {
         }
 
         $changed = empty($instance->coassemblecourseid) || (int) $instance->coassemblecourseid !== $courseid;
+        if ($linkmode !== null && !in_array($linkmode, ['created', 'linked', 'copied'], true)) {
+            throw new \coding_exception('Invalid Coassemble link mode');
+        }
+        // A browser event or recovery cannot establish ownership of an arbitrary course.
+        $instance->linkmode = $linkmode ?? ($changed ? 'linked' : ($instance->linkmode ?? 'linked'));
         $instance->coassemblecourseid = $courseid;
         $instance->timemodified = time();
         if (empty($instance->timeauthored)) {

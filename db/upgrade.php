@@ -97,5 +97,14 @@ function xmldb_coassemble_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2026072204, 'coassemble');
     }
 
+    if ($oldversion < 2026092200) {
+        $table = new xmldb_table('coassemble');
+        $field = new xmldb_field('linkmode', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'created', 'coassemblecourseid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_mod_savepoint(true, 2026092200, 'coassemble');
+    }
+
     return true;
 }

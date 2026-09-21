@@ -53,6 +53,8 @@ class restore_coassemble_activity_structure_step extends restore_activity_struct
 
         $data = (object) $data;
         $data->course = $this->get_courseid();
+        // Old backups cannot establish ownership of a remote course.
+        $data->linkmode = $data->linkmode ?? 'linked';
 
         // The linked Coassemble course id stays valid only within the same
         // workspace; it is kept so same-site restores keep working.

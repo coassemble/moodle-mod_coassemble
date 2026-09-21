@@ -35,7 +35,7 @@ class backup_coassemble_activity_structure_step extends backup_activity_structur
         $userinfo = $this->get_setting_value('userinfo');
 
         $coassemble = new backup_nested_element('coassemble', ['id'], [
-            'name', 'intro', 'introformat', 'coassemblecourseid', 'collectionid',
+            'name', 'intro', 'introformat', 'coassemblecourseid', 'linkmode', 'collectionid',
             'flow', 'themeid', 'language', 'grade', 'grademethod', 'completioncourse',
             'timecreated', 'timemodified', 'timeauthored',
         ]);

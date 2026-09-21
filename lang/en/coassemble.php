@@ -54,6 +54,7 @@ $string['connection_authoring_ok'] = 'Authoring embed issuance succeeded (probe 
 $string['connection_coursecount'] = 'Courses visible to API key (sample page): {$a}';
 $string['connection_ok'] = 'Successfully connected to the Coassemble Headless API, including authoring.';
 $string['error_apirequest'] = 'Coassemble could not complete the request. Please try again. If the problem continues, contact your site administrator.';
+$string['error_coursechanged'] = 'This activity is already linked to a different course. Reload the activity before continuing.';
 $string['error_embedurl'] = 'Coassemble did not return a valid signed embed URL.';
 $string['error_nocollection'] = 'No Coassemble collection is linked to this activity.';
 $string['error_nocourseyet'] = 'No Coassemble learning object is linked yet. An author needs to create one in the builder first.';

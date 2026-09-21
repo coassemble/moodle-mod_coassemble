@@ -64,6 +64,21 @@ final class update_course_test extends \advanced_testcase {
     }
 
     /**
+
+     * Builder events cannot replace a course chosen in another tab.
+
+     */
+    public function test_builder_cannot_replace_a_linked_course(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        [, $instance, $cm] = $this->setup_activity();
+        \mod_coassemble\local\course_link::persist($instance, 123, '', 'linked');
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('error_coursechanged', 'mod_coassemble'));
+        update_course::execute((int) $cm->id, 456, 'Stale tab');
+    }
+
+    /**
      * Users without the author capability are rejected.
      */
     public function test_student_cannot_persist_course_link(): void {

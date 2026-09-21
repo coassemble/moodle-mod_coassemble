@@ -82,6 +82,9 @@ class update_course extends \core_external\external_api {
         require_capability('mod/coassemble:author', $context);
 
         $instance = $DB->get_record('coassemble', ['id' => $cm->instance], '*', MUST_EXIST);
+        if (!empty($instance->coassemblecourseid) && (int) $instance->coassemblecourseid !== $courseid) {
+            throw new \moodle_exception('error_coursechanged', 'mod_coassemble');
+        }
         $instance = \mod_coassemble\local\course_link::persist($instance, $courseid, $title);
 
         return ['courseid' => (int) $instance->coassemblecourseid];

@@ -98,7 +98,7 @@ function coassemble_update_instance(stdClass $data, $mform = null) {
     // The Coassemble course link (and collection/theme/language) are managed
     // by the builder integration, not the settings form — never touch them
     // here or editing settings would unlink the course.
-    unset($data->coassemblecourseid, $data->collectionid, $data->themeid, $data->language);
+    unset($data->coassemblecourseid, $data->linkmode, $data->collectionid, $data->themeid, $data->language);
     $data->completioncourse = !empty($data->completioncourse) ? 1 : 0;
     $data->grademethod = !empty($data->grademethod) ? 1 : 0;
 

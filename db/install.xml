@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/coassemble/db" VERSION="20260722" COMMENT="XMLDB file for mod_coassemble"
+<XMLDB PATH="mod/coassemble/db" VERSION="20260922" COMMENT="XMLDB file for mod_coassemble"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -12,6 +12,7 @@
         <FIELD NAME="intro" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="coassemblecourseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Coassemble course id"/>
+        <FIELD NAME="linkmode" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="created" SEQUENCE="false" COMMENT="Course origin: created, linked or copied"/>
         <FIELD NAME="collectionid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Optional Coassemble collection id"/>
         <FIELD NAME="flow" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="Initial builder flow"/>
         <FIELD NAME="themeid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>

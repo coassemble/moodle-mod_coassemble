@@ -243,7 +243,7 @@ if ($mode === 'edit') {
     }
 
     if (empty($instance->coassemblecourseid) && !empty($embed['courseid'])) {
-        $instance = \mod_coassemble\local\course_link::persist($instance, (int) $embed['courseid']);
+        $instance = \mod_coassemble\local\course_link::persist($instance, (int) $embed['courseid'], '', 'created');
         $hascourse = true;
     }
 
