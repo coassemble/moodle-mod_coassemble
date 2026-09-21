@@ -1,5 +1,12 @@
 # Install checklist — mod_coassemble
 
+## Subscription required
+
+The Coassemble plug-in requires a commercial subscription to Coassemble, with available plans for clients and partners. For more information, please contact [moodle@coassemble.com](mailto:moodle@coassemble.com), or visit [moodle.coassemble.com](http://moodle.coassemble.com).
+
+Ensure your subscription includes API access and authoring entitlement before
+configuring the plugin.
+
 ## Package
 
 Install from a release ZIP, or build one by zipping this repository's contents

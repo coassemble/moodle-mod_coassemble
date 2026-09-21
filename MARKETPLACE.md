@@ -5,11 +5,10 @@ activity. Teachers can create and manage content; learners take linked courses
 inside Moodle. Progress, completion and grades synchronise with Moodle, with
 course and learner analytics available to authorised staff.
 
-The plugin is free to install, but **an active, paid Coassemble subscription with
-API access and authoring entitlement is required to use it**. A subscription is
-not included with the plugin. Obtain one directly from
-[Coassemble](https://coassemble.com/pricing) or through a Coassemble partner.
-Confirm the required entitlements before purchasing.
+The Coassemble plug-in requires a commercial subscription to Coassemble, with available plans for clients and partners. For more information, please contact [moodle@coassemble.com](mailto:moodle@coassemble.com), or visit [moodle.coassemble.com](http://moodle.coassemble.com).
+
+The plugin is free to install; a Coassemble subscription is not included.
+API access and authoring entitlement are required.
 
 Requires Moodle 4.1–5.2 and a PHP version supported by your Moodle release.
 Use a maintained Moodle release for new installations. Configure your workspace

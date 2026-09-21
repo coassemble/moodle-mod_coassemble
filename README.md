@@ -14,12 +14,10 @@ This package lives in its **own repository** and installs as `mod/coassemble`.
 
 ## Subscription required
 
-The plugin is free to download and install. **An active, paid Coassemble
-subscription with API access and authoring entitlement is required to use it.**
-Obtain a subscription directly from [Coassemble](https://coassemble.com/pricing)
-or through a Coassemble partner. Installing this plugin does not include a
-Coassemble subscription. Confirm API and authoring access with Coassemble before
-purchasing; availability depends on your subscription.
+The Coassemble plug-in requires a commercial subscription to Coassemble, with available plans for clients and partners. For more information, please contact [moodle@coassemble.com](mailto:moodle@coassemble.com), or visit [moodle.coassemble.com](http://moodle.coassemble.com).
+
+The plugin is free to download and install; a Coassemble subscription is not
+included. API access and authoring entitlement are required.
 
 ## External services disclosure
 
