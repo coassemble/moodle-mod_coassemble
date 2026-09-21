@@ -31,7 +31,7 @@ $id = required_param('id', PARAM_INT);
 $instance = $DB->get_record('coassemble', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, false, $cm);
-require_sesskey();
+\mod_coassemble\local\action::require_post();
 $context = context_module::instance($cm->id);
 require_capability('mod/coassemble:manage', $context);
 

@@ -44,7 +44,7 @@ $identifier = \mod_coassemble\local\identity::for_user($USER);
 $clientidentifier = \mod_coassemble\local\identity::client_identifier();
 
 if ($action !== '') {
-    require_sesskey();
+    \mod_coassemble\local\action::require_post();
     if (empty($instance->coassemblecourseid) && $action !== 'refresh') {
         redirect($PAGE->url, get_string('error_nocourseyet', 'mod_coassemble'), null, \core\output\notification::NOTIFY_ERROR);
     }
@@ -89,11 +89,9 @@ if ($action !== '') {
                 break;
             case 'scorm':
                 $binary = $client->export_scorm($courseid);
-                header('Content-Type: application/zip');
-                header('Content-Disposition: attachment; filename="coassemble-' . $courseid . '.zip"');
-                header('Content-Length: ' . strlen($binary));
-                echo $binary;
-                exit;
+                require_once($CFG->libdir . '/filelib.php');
+                send_temp_file($binary, 'coassemble-' . $courseid . '.zip', true);
+                break;
             case 'refresh':
                 // Pull latest title from Headless when linked.
                 if (!empty($instance->coassemblecourseid)) {
@@ -218,7 +216,7 @@ if (!empty($instance->coassemblecourseid)) {
     echo $OUTPUT->single_button(
         new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'resolve' => 1]),
         get_string('resolve_course', 'mod_coassemble'),
-        'get'
+        'post'
     );
     echo html_writer::end_div();
 }

@@ -44,6 +44,11 @@ $canauthor = has_capability('mod/coassemble:author', $context);
 $hascourse = !empty($instance->coassemblecourseid);
 $hascollection = !empty($instance->collectionid);
 
+if ($resolve) {
+    require_capability('mod/coassemble:author', $context);
+    \mod_coassemble\local\action::require_post();
+}
+
 if ($mode === '') {
     if ($canauthor && !$hascourse && !$hascollection) {
         $mode = 'edit';
@@ -248,18 +253,13 @@ if ($mode === 'edit') {
     }
 
     $backurl = new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'mode' => 'view']);
-    // If still unlinked when teacher hits back, try API resolve first.
-    $resolveback = new moodle_url('/mod/coassemble/view.php', [
-        'id' => $cm->id,
-        'resolve' => 1,
-    ]);
-
     $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [[
         'iframeId' => 'coassemble-embed-frame',
         'expectedOrigin' => coassemble_embed_origin($embed['url']),
         'mode' => 'edit',
         'cmid' => (int) $cm->id,
-        'backUrl' => $hascourse ? $backurl->out(false) : $resolveback->out(false),
+        'backUrl' => $backurl->out(false),
+        'resolveFormId' => !$hascourse ? 'coassemble-resolve-form' : '',
         'persistCourse' => true,
         'statusElId' => 'coassemble-session-status',
         'strings' => [
@@ -307,6 +307,18 @@ if ($mode === 'edit') {
         'title' => get_string('builder_iframe_title', 'mod_coassemble'),
     ]);
     echo html_writer::end_div();
+    if (!$hascourse) {
+        echo html_writer::start_tag('form', [
+            'id' => 'coassemble-resolve-form',
+            'method' => 'post',
+            'action' => (new moodle_url('/mod/coassemble/view.php'))->out(false),
+            'hidden' => 'hidden',
+        ]);
+        foreach (['id' => $cm->id, 'resolve' => 1, 'sesskey' => sesskey()] as $name => $value) {
+            echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
+        }
+        echo html_writer::end_tag('form');
+    }
     echo $OUTPUT->footer();
     exit;
 }
@@ -324,7 +336,7 @@ if (!$hascourse) {
         echo $OUTPUT->single_button(
             new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'resolve' => 1]),
             get_string('resolve_course', 'mod_coassemble'),
-            'get'
+            'post'
         );
     }
     echo $OUTPUT->footer();

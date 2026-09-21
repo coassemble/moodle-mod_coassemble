@@ -183,7 +183,10 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             }
 
             if (payload.type === 'back') {
-                if (config.backUrl) {
+                const resolveForm = config.resolveFormId ? document.getElementById(config.resolveFormId) : null;
+                if (resolveForm) {
+                    resolveForm.requestSubmit();
+                } else if (config.backUrl) {
                     window.location.href = config.backUrl;
                 }
             } else if (payload.type === 'session') {

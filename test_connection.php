@@ -32,6 +32,14 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_title(get_string('settings_testconnection', 'mod_coassemble'));
 $PAGE->set_heading(get_string('settings_testconnection', 'mod_coassemble'));
 
+if (!data_submitted()) {
+    echo $OUTPUT->header();
+    echo $OUTPUT->single_button($PAGE->url, get_string('settings_testconnection_link', 'mod_coassemble'), 'post');
+    echo $OUTPUT->footer();
+    exit;
+}
+\mod_coassemble\local\action::require_post();
+
 $client = new \mod_coassemble\api\client();
 $result = $client->test_connection();
 
