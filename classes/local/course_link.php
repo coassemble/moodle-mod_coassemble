@@ -60,6 +60,7 @@ class course_link {
             $instance->name = $title;
         }
         $DB->update_record('coassemble', $instance);
+        course_metadata::invalidate($courseid);
 
         if ($changed || $title !== '') {
             rebuild_course_cache((int) $instance->course, true);

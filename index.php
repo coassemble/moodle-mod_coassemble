@@ -48,12 +48,20 @@ if (!$cms) {
 }
 
 $instances = coassemble_get_instances($course->id);
-$canmanage = has_capability('mod/coassemble:manage', context_course::instance($course->id));
-
+$managed = [];
+$courseids = [];
+foreach ($cms as $cm) {
+    if ($cm->uservisible && has_capability('mod/coassemble:manage', context_module::instance($cm->id))) {
+        $managed[$cm->id] = true;
+        $courseids[] = $instances[$cm->instance]->coassemblecourseid ?? null;
+    }
+}
+$metadata = $managed ? \mod_coassemble\local\course_metadata::get_many($courseids, new \mod_coassemble\api\client()) : [];
 $table = new html_table();
 $table->head = [get_string('name')];
-if ($canmanage) {
-    $table->head[] = get_string('coassemblecourseid', 'mod_coassemble');
+if ($managed) {
+    $table->head = array_merge($table->head, [get_string('manage_remote_title', 'mod_coassemble'),
+        get_string('library_status', 'mod_coassemble'), get_string('linkmode', 'mod_coassemble'), get_string('actions')]);
 }
 $table->data = [];
 foreach ($cms as $cm) {
@@ -67,10 +75,30 @@ foreach ($cms as $cm) {
     $row = [
         html_writer::link(new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id]), format_string($instance->name)),
     ];
-    if ($canmanage) {
-        $row[] = $instance->coassemblecourseid ? (int) $instance->coassemblecourseid : get_string('notyetlinked', 'mod_coassemble');
+    if ($managed) {
+        if (isset($managed[$cm->id])) {
+            $remote = $metadata[$instance->coassemblecourseid] ?? [];
+            $title = get_string('notyetlinked', 'mod_coassemble');
+            $status = '';
+            $origin = '';
+            if (!empty($instance->coassemblecourseid)) {
+                $title = !empty($remote['available']) ? s($remote['title']) : get_string('metadata_unavailable', 'mod_coassemble');
+                $status = !empty($remote['available'])
+                    ? get_string($remote['published'] ? 'library_published' : 'library_draft', 'mod_coassemble') : '';
+                $origin = get_string('origin_' . $instance->linkmode, 'mod_coassemble');
+            }
+            $row = array_merge($row, [$title, $status, $origin, html_writer::link(
+                new moodle_url('/mod/coassemble/report.php', ['id' => $cm->id]),
+                get_string('nav_report', 'mod_coassemble')
+            )]);
+        } else {
+            $row = array_merge($row, ['', '', '', '']);
+        }
     }
     $table->data[] = $row;
 }
 echo html_writer::table($table);
+if ($managed) {
+    echo html_writer::tag('p', get_string('metadata_cache_help', 'mod_coassemble'), ['class' => 'small']);
+}
 echo $OUTPUT->footer();

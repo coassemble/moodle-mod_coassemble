@@ -67,6 +67,7 @@ if ($action !== '') {
         exit;
     }
     $courseid = (int) $instance->coassemblecourseid;
+    \mod_coassemble\local\course_metadata::invalidate($courseid);
     try {
         switch ($action) {
             case 'publish':
