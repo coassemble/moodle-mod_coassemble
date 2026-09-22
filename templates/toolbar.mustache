@@ -23,6 +23,7 @@
     * label - Accessible navigation label
     * links - Navigation links containing url, label and optional primary/current/exit
     * class - Optional toolbar class
+    * coursename, activityname - Optional Moodle-formatted context labels
 
     Example context (json):
     {
@@ -32,6 +33,13 @@
     }
 }}
 <nav class="coassemble-toolbar {{class}}" aria-label="{{label}}">
+    {{#coursename}}
+    <div class="coassemble-course-context">
+        <span class="coassemble-course-name">{{{coursename}}}</span>
+        <span aria-hidden="true"> / </span>
+        <span class="coassemble-activity-name">{{{activityname}}}</span>
+    </div>
+    {{/coursename}}
     {{#links}}
     <a href="{{url}}" class="btn {{#exit}}btn-link coassemble-exit-authoring{{/exit}}{{^exit}}{{#primary}}btn-primary{{/primary}}{{^primary}}btn-secondary{{/primary}}{{/exit}}"{{#current}} aria-current="true"{{/current}}>{{label}}</a>
     {{/links}}

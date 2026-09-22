@@ -68,3 +68,42 @@
     color: #595959;
     background: #f2f2f2;
 }
+
+.path-mod-coassemble.pagelayout-embedded #page {
+    padding: 0;
+}
+
+.path-mod-coassemble .coassemble-player-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+}
+
+.path-mod-coassemble .coassemble-player-layout .coassemble-player-chrome {
+    flex-shrink: 0;
+    padding: 0.35rem 0.75rem;
+    margin: 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.path-mod-coassemble .coassemble-course-context {
+    flex: 1 1 12rem;
+    overflow-wrap: anywhere;
+    font-size: 0.875rem;
+}
+
+.path-mod-coassemble .coassemble-course-name {
+    font-weight: 600;
+}
+
+.path-mod-coassemble .coassemble-player-layout .coassemble-embed-shell {
+    flex: 1 1 auto;
+    min-height: 240px;
+    border-radius: 0;
+}
+
+.path-mod-coassemble .coassemble-player-layout .coassemble-embed-iframe {
+    height: 100%;
+    min-height: 240px;
+}

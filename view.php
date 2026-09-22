@@ -178,9 +178,15 @@ if ($mode === 'collection') {
             'expired' => get_string('session_expired', 'mod_coassemble'),
         ],
     ]]);
+    $PAGE->set_pagelayout('embedded');
+    $PAGE->activityheader->disable();
     echo $OUTPUT->header();
+    echo html_writer::start_div('coassemble-player-layout');
     echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
         'label' => get_string('modulename', 'mod_coassemble'),
+        'class' => 'coassemble-player-chrome',
+        'coursename' => format_string($course->fullname),
+        'activityname' => format_string($instance->name),
         'links' => [['url' => $exiturl->out(false), 'label' => $exitlabel, 'exit' => true]],
     ]);
     echo $OUTPUT->render_from_template('mod_coassemble/embed', [
@@ -189,6 +195,7 @@ if ($mode === 'collection') {
         'allow' => 'clipboard-write; fullscreen; microphone; camera',
         'shellclass' => 'coassemble-embed-shell--view',
     ]);
+    echo html_writer::end_div();
     echo $OUTPUT->footer();
     exit;
 }
@@ -387,9 +394,12 @@ if ($canauthor) {
 }
 $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [$jsconfig]);
 
+$PAGE->set_pagelayout('embedded');
+$PAGE->activityheader->disable();
 echo $OUTPUT->header();
+echo html_writer::start_div('coassemble-player-layout');
 
-// Keep course navigation available alongside the embedded activity.
+// Keep the course context and return path alongside the full-bleed player.
 $chromelinks = [['url' => $exiturl->out(false), 'label' => $exitlabel, 'exit' => true]];
 if ($canauthor) {
     $remote = null;
@@ -416,6 +426,8 @@ if ($canauthor) {
 echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
     'label' => get_string('modulename', 'mod_coassemble'),
     'class' => 'coassemble-player-chrome',
+    'coursename' => format_string($course->fullname),
+    'activityname' => format_string($instance->name),
     'links' => $chromelinks,
 ]);
 if ($canauthor && !empty($remote) && empty($remote['published'])) {
@@ -427,4 +439,5 @@ echo $OUTPUT->render_from_template('mod_coassemble/embed', [
     'allow' => 'clipboard-write; fullscreen; microphone; camera',
     'shellclass' => 'coassemble-embed-shell--view',
 ]);
+echo html_writer::end_div();
 echo $OUTPUT->footer();
