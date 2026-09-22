@@ -142,23 +142,49 @@ final class course_link_test extends \advanced_testcase {
             $this->assertEquals(123, $DB->get_field('coassemble', 'coassemblecourseid', ['id' => $instance->id]));
         }
     }
+    #[\PHPUnit\Framework\Attributes\DataProvider('restored_origins_provider')]
     /**
-     * Moodle's actual backup and restore path retains shared-course ownership.
+     * Restoring an activity never grants the right to delete its remote course.
+     *
+     * @dataProvider restored_origins_provider
+     * @param string $mode Original activity's ownership mode
      */
-    public function test_backup_restore_preserves_origin(): void {
+    public function test_backup_restore_does_not_grant_delete_rights(string $mode): void {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/course/lib.php');
         $this->resetAfterTest();
         $this->setAdminUser();
         $course = $this->getDataGenerator()->create_course();
-        foreach (['created', 'linked', 'copied'] as $mode) {
-            $instance = $this->getDataGenerator()->create_module('coassemble', [
-                'course' => $course->id, 'coassemblecourseid' => 123, 'linkmode' => $mode,
-            ]);
-            $cm = get_coursemodule_from_instance('coassemble', $instance->id);
-            $restored = duplicate_module($course, $cm);
-            $this->assertSame($mode, $DB->get_field('coassemble', 'linkmode', ['id' => $restored->instance]));
-            $this->assertEquals(123, $DB->get_field('coassemble', 'coassemblecourseid', ['id' => $restored->instance]));
-        }
+        $instance = $this->getDataGenerator()->create_module('coassemble', [
+            'course' => $course->id, 'coassemblecourseid' => 123, 'linkmode' => $mode,
+        ]);
+        $cm = get_coursemodule_from_instance('coassemble', $instance->id);
+        $restoredcm = duplicate_module($course, $cm);
+        $restored = $DB->get_record('coassemble', ['id' => $restoredcm->instance], '*', MUST_EXIST);
+        $this->assertSame('linked', $restored->linkmode);
+        $this->assertEquals(123, $restored->coassemblecourseid);
+        $this->assertSame($mode, $DB->get_field('coassemble', 'linkmode', ['id' => $instance->id]));
+
+        // Model a destination site with no record of the original activity.
+        course_delete_module($cm->id);
+        $this->assertSame(0, course_link::other_uses($restored));
+        $client = $this->createMock(\mod_coassemble\api\client::class);
+        $client->expects($this->never())->method('delete_course');
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('manage_delete_linked', 'mod_coassemble'));
+        course_link::delete_remote($restored, $client);
+    }
+
+    /**
+     * Ownership modes which may be present in a backup.
+     *
+     * @return array
+     */
+    public static function restored_origins_provider(): array {
+        return [
+            'created' => ['created'],
+            'linked' => ['linked'],
+            'copied' => ['copied'],
+        ];
     }
 }

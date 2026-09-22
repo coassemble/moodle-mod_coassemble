@@ -8,7 +8,9 @@
 - Add “Use an existing course” to activity settings and creation choices. Browse
   the library from the Moodle course menu without first adding an activity.
 - Offer “Use this course” and “Make a copy”, preserve the Moodle activity name,
-  and track created/linked/copied origins through upgrades and backup/restore.
+  and track created/linked/copied origins through upgrades. Restored activities
+  retain their remote course link but cannot delete the remote course, including
+  when restored onto another Moodle site sharing the same workspace.
 - Add Unlink with confirmation and clear local progress, grades and completion
   when switching content. Prevent remote deletion of linked courses or courses
   referenced by another activity. Reject stale management forms.
