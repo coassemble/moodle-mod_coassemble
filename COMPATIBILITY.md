@@ -2,7 +2,7 @@
 
 Declared support: `$plugin->supported = [401, 502]` — **Moodle 4.1 to 5.2**.
 Minimum: `$plugin->requires = 2022112800` (Moodle 4.1).
-Plugin release **1.4.0**, version `2026092203` (unreleased).
+Plugin release **1.4.0**, version `2026092204` (unreleased).
 
 | Moodle | PHP in CI | Coverage |
 |--------|-----------|----------|
@@ -50,6 +50,12 @@ workspace entitlement. No database changes are required on the Coassemble side.
 Narrations, translations and brand voice default to enabled in the plugin's site
 settings. Disable features your plan does not include; embed flags do not check
 entitlements. Narration usage is shared across the workspace's authors.
+
+AI generation, Google Drive import and OneDrive import also default to enabled.
+These are site governance controls, not additional plan entitlements. Disabling
+AI prevents AI creation requests as well as hiding its creation choices.
+Moodle 5.1+ uses the Activities overview integration; older versions retain
+the Coassemble index.
 
 ## Distribution
 

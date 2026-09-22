@@ -120,9 +120,9 @@ if ($mode === 'choose') {
     echo $OUTPUT->header();
     echo $OUTPUT->heading(format_string($instance->name));
     $flowlinks = [];
-    foreach (['' => 'flow_scratch', 'ai' => 'flow_ai', 'existing' => 'flow_existing'] as $key => $label) {
+    foreach (\mod_coassemble\local\builder_options::creation_flows() as $key => $label) {
         $url = new moodle_url('/mod/coassemble/view.php', ['id' => $id, 'mode' => 'edit', 'flow' => $key]);
-        $flowlinks[] = ['url' => $url->out(false), 'label' => get_string($label, 'mod_coassemble'),
+        $flowlinks[] = ['url' => $url->out(false), 'label' => $label,
             'post' => $key !== 'existing', 'sesskey' => sesskey()];
     }
     echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
@@ -212,6 +212,9 @@ if ($mode === 'collection') {
 if ($mode === 'edit') {
     require_capability('mod/coassemble:author', $context);
 
+    if (!$hascourse) {
+        \mod_coassemble\local\builder_options::require_creation_flow($selectedflow);
+    }
     $options = \mod_coassemble\local\builder_options::for_context($context);
 
     if ($selectedflow !== '' && empty($instance->coassemblecourseid)) {
@@ -282,11 +285,7 @@ if ($mode === 'edit') {
         ]],
     ]);
 
-    $createflows = [
-        '' => get_string('flow_scratch', 'mod_coassemble'),
-        'ai' => get_string('flow_ai', 'mod_coassemble'),
-        'existing' => get_string('flow_existing', 'mod_coassemble'),
-    ];
+    $createflows = \mod_coassemble\local\builder_options::creation_flows();
     if (empty($instance->coassemblecourseid)) {
         $flowlinks = [];
         foreach ($createflows as $fkey => $flabel) {

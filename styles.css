@@ -25,6 +25,7 @@
     margin-inline-end: auto;
 }
 
+.path-mod-coassemble .coassemble-manage-notice,
 .path-mod-coassemble .coassemble-manage-actions,
 .path-mod-coassemble .coassemble-library-pagination {
     margin-block-start: 1rem;

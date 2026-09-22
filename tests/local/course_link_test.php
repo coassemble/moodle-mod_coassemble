@@ -89,7 +89,7 @@ final class course_link_test extends \advanced_testcase {
         $client = $this->createMock(\mod_coassemble\api\client::class);
         $client->expects($this->never())->method('delete_course');
         $this->expectException(\moodle_exception::class);
-        $this->expectExceptionMessage(get_string('manage_delete_shared', 'mod_coassemble', 1));
+        $this->expectExceptionMessage(get_string('manage_delete_shared_singular', 'mod_coassemble', 1));
         course_link::delete_remote($instance, $client);
     }
 

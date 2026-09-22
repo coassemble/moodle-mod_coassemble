@@ -2,11 +2,18 @@
 
 ## 1.4.0 (unreleased)
 
+- Integrate with the Moodle 5.1+ Activities overview, reusing cached remote
+  metadata and limiting author information to activity managers.
+- Use singular shared-course messages for one other activity and space the
+  unlinked notice away from the management table.
 - Keep successful embed loads quiet; retain actionable expired-session and error messages.
-- Use the Coassemble brand mark as the monochrome Moodle activity icon.
+- Use the supplied Coassemble brand mark with internal padding and Moodle's
+  branded-icon callback to preserve its colours.
 - Give the course builder the full-window player layout while retaining Moodle
   course and activity context and a return link.
-- Add default-on site settings for narrations, translations and brand voice.
+- Add default-on site settings for AI generation, Google Drive import, OneDrive
+  import, narrations, translations and brand voice. Disabled AI creation is
+  hidden throughout Moodle and rejected before issuing an embed.
   Enable in-builder publishing only for users with the manage capability.
 - Move publishing and revert into the builder. Remove the unused Restore action,
   distinguish published courses with unpublished changes, and space management

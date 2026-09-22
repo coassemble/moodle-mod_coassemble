@@ -76,3 +76,18 @@ Feature: Coassemble activity basics
     And "Generate with AI" "button" should exist
     And "Use an existing course" "link" should exist
     And "#coassemble-embed-frame" "css_element" should not exist
+
+  Scenario: Disabling AI removes creation choices from the activity and manage pages
+    Given the following config values are set as admin:
+      | config | value               | plugin         |
+      | apiurl | https://example.com | mod_coassemble |
+      | apikey | unused-test-key     | mod_coassemble |
+      | ai     | 0                   | mod_coassemble |
+    When I am on the "Test Coassemble" "coassemble activity" page logged in as teacher1
+    Then "Start from scratch" "button" should exist
+    And I should not see "Generate with AI"
+    When I navigate to "Manage content" in current page administration
+    Then "Start from scratch" "button" should exist
+    And I should not see "Generate with AI"
+    When I am on the "Test Coassemble" "coassemble activity editing" page
+    Then the "Initial create flow" select box should not contain "Generate with AI"

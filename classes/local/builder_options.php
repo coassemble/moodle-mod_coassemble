@@ -39,14 +39,40 @@ class builder_options {
         return [
             'back' => 'event',
             'legacy' => false,
-            'ai' => true,
-            'googleDrive' => true,
-            'oneDrive' => true,
+            'ai' => (bool) ($config->ai ?? true),
+            'googleDrive' => (bool) ($config->googledrive ?? true),
+            'oneDrive' => (bool) ($config->onedrive ?? true),
             'feedback' => true,
             'narrations' => (bool) ($config->narrations ?? true),
             'translations' => (bool) ($config->translations ?? true),
             'brandVoice' => (bool) ($config->brandvoice ?? true),
             'publishing' => has_capability('mod/coassemble:manage', $context),
         ];
+    }
+
+    /**
+     * Creation choices available under the current site settings.
+     *
+     * @return array Flow identifiers and labels
+     */
+    public static function creation_flows(): array {
+        $config = get_config('mod_coassemble');
+        $flows = ['' => get_string('flow_scratch', 'mod_coassemble')];
+        if ((bool) ($config->ai ?? true)) {
+            $flows['ai'] = get_string('flow_ai', 'mod_coassemble');
+        }
+        $flows['existing'] = get_string('flow_existing', 'mod_coassemble');
+        return $flows;
+    }
+
+    /**
+     * Reject disabled or unknown flows before issuing a creation embed.
+     *
+     * @param string $flow Requested or saved creation flow
+     */
+    public static function require_creation_flow(string $flow): void {
+        if (!array_key_exists($flow, self::creation_flows())) {
+            throw new \moodle_exception('error_creationflow', 'mod_coassemble');
+        }
     }
 }

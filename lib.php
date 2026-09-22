@@ -50,6 +50,15 @@ function coassemble_supports($feature) {
 }
 
 /**
+ * Preserve the Coassemble brand colours in Moodle activity icons.
+ *
+ * @return bool
+ */
+function coassemble_is_branded(): bool {
+    return true;
+}
+
+/**
  * Add a new instance.
  *
  * @param stdClass $data

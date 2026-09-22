@@ -50,11 +50,7 @@ class mod_coassemble_mod_form extends moodleform_mod {
 
         $mform->addElement('static', 'authoringnote', '', get_string('authoringnote', 'mod_coassemble'));
 
-        $flows = [
-            '' => get_string('flow_scratch', 'mod_coassemble'),
-            'ai' => get_string('flow_ai', 'mod_coassemble'),
-            'existing' => get_string('flow_existing', 'mod_coassemble'),
-        ];
+        $flows = \mod_coassemble\local\builder_options::creation_flows();
         $mform->addElement('select', 'flow', get_string('flow', 'mod_coassemble'), $flows);
         $mform->addHelpButton('flow', 'flow', 'mod_coassemble');
         $mform->setDefault('flow', '');

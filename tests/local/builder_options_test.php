@@ -32,11 +32,11 @@ final class builder_options_test extends \advanced_testcase {
     public function test_features_default_on_when_settings_are_missing(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
-        foreach (['narrations', 'translations', 'brandvoice'] as $feature) {
+        foreach (['ai', 'googledrive', 'onedrive', 'narrations', 'translations', 'brandvoice'] as $feature) {
             unset_config($feature, 'mod_coassemble');
         }
         $options = builder_options::for_context(\context_system::instance());
-        foreach (['narrations', 'translations', 'brandVoice', 'publishing'] as $feature) {
+        foreach (['ai', 'googleDrive', 'oneDrive', 'narrations', 'translations', 'brandVoice', 'publishing'] as $feature) {
             $this->assertTrue($options[$feature]);
         }
     }
@@ -47,7 +47,10 @@ final class builder_options_test extends \advanced_testcase {
     public function test_features_can_be_disabled_independently(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
-        $features = ['narrations' => 'narrations', 'translations' => 'translations', 'brandvoice' => 'brandVoice'];
+        $features = [
+            'ai' => 'ai', 'googledrive' => 'googleDrive', 'onedrive' => 'oneDrive',
+            'narrations' => 'narrations', 'translations' => 'translations', 'brandvoice' => 'brandVoice',
+        ];
         foreach (array_keys($features) as $disabled) {
             foreach (array_keys($features) as $setting) {
                 set_config($setting, $setting === $disabled ? '0' : '1', 'mod_coassemble');
@@ -58,6 +61,23 @@ final class builder_options_test extends \advanced_testcase {
             }
             $this->assertTrue($options['publishing']);
         }
+    }
+
+    /**
+     * Disabling AI removes the creation choice and blocks saved or forged requests.
+     */
+    public function test_ai_creation_obeys_current_settings(): void {
+        $this->resetAfterTest();
+        unset_config('ai', 'mod_coassemble');
+        $this->assertArrayHasKey('ai', builder_options::creation_flows());
+        builder_options::require_creation_flow('ai');
+        set_config('ai', 0, 'mod_coassemble');
+        $this->assertSame(['', 'existing'], array_keys(builder_options::creation_flows()));
+        builder_options::require_creation_flow('');
+        builder_options::require_creation_flow('existing');
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('error_creationflow', 'mod_coassemble'));
+        builder_options::require_creation_flow('ai');
     }
 
     /**

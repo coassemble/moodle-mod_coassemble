@@ -40,7 +40,10 @@ Data received from Coassemble: course metadata (titles, publish state), learner 
 | Coassemble plan | Paid subscription with API access **and** `api_authoring` |
 
 Optional builder features default to on and can be disabled under the plugin's
-site settings to match your Coassemble plan:
+site settings. AI generation, Google Drive import and OneDrive import are
+site governance controls, independent of plan entitlements. Disabling AI also
+removes the AI creation choice and rejects AI creation requests. The following
+features additionally require Coassemble entitlements:
 
 | Builder feature | Additional Coassemble entitlements |
 |-----------------|------------------------------------|
@@ -52,6 +55,10 @@ These are in addition to `api` and `api_authoring`. The plugin cannot detect
 entitlements. Narration usage draws from the shared workspace allowance.
 Publishing is controlled by Moodle's `mod/coassemble:manage` capability; it has
 no separate feature setting or Coassemble publishing entitlement.
+
+Moodle 5.1+ Activities overview shows managers the remote course title,
+publication state and relationship, with the same cached metadata as the
+Coassemble index. Learners retain Moodle completion and grade information.
 
 ## Install
 

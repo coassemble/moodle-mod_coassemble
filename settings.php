@@ -65,7 +65,7 @@ if ($ADMIN->fulltree) {
         get_string('settings_builderfeatures', 'mod_coassemble'),
         get_string('settings_builderfeatures_desc', 'mod_coassemble')
     ));
-    foreach (['narrations', 'translations', 'brandvoice'] as $feature) {
+    foreach (['ai', 'googledrive', 'onedrive', 'narrations', 'translations', 'brandvoice'] as $feature) {
         $settings->add(new admin_setting_configcheckbox(
             'mod_coassemble/' . $feature,
             get_string('settings_' . $feature, 'mod_coassemble'),

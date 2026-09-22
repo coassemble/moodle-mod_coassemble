@@ -141,7 +141,12 @@ class course_link {
             }
             $others = self::other_uses($instance);
             if ($others) {
-                throw new \moodle_exception('manage_delete_shared', 'mod_coassemble', '', $others);
+                throw new \moodle_exception(
+                    $others === 1 ? 'manage_delete_shared_singular' : 'manage_delete_shared',
+                    'mod_coassemble',
+                    '',
+                    $others
+                );
             }
             $client->delete_course($courseid);
             return self::unlink($instance);
