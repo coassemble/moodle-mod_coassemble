@@ -65,3 +65,14 @@ Feature: Coassemble activity basics
     And I navigate to "Coassemble course library" in current page administration
     Then I should see "Coassemble course library"
     And I should see "Coassemble API credentials are not configured"
+
+  Scenario: Opening a create URL offers choices before requesting an authoring embed
+    Given the following config values are set as admin:
+      | config | value               | plugin         |
+      | apiurl | https://example.com | mod_coassemble |
+      | apikey | unused-test-key     | mod_coassemble |
+    When I am on the "Test Coassemble" "coassemble activity" page logged in as teacher1
+    Then "Start from scratch" "button" should exist
+    And "Generate with AI" "button" should exist
+    And "Use an existing course" "link" should exist
+    And "#coassemble-embed-frame" "css_element" should not exist

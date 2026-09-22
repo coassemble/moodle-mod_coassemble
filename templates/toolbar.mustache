@@ -22,6 +22,7 @@
     Context variables required for this template:
     * label - Accessible navigation label
     * links - Navigation links containing url, label and optional primary/current/exit
+    * post, sesskey - Optional POST form fields on a link
     * class - Optional toolbar class
     * coursename, activityname - Optional Moodle-formatted context labels
 
@@ -41,6 +42,14 @@
     </div>
     {{/coursename}}
     {{#links}}
+    {{#post}}
+    <form method="post" action="{{url}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <button type="submit" class="btn {{#primary}}btn-primary{{/primary}}{{^primary}}btn-secondary{{/primary}}">{{label}}</button>
+    </form>
+    {{/post}}
+    {{^post}}
     <a href="{{url}}" class="btn {{#exit}}btn-link coassemble-exit-authoring{{/exit}}{{^exit}}{{#primary}}btn-primary{{/primary}}{{^primary}}btn-secondary{{/primary}}{{/exit}}"{{#current}} aria-current="true"{{/current}}>{{label}}</a>
+    {{/post}}
     {{/links}}
 </nav>

@@ -70,6 +70,15 @@ if ($canauthor && !$hascourse && ($resolve || $selectedflow === 'existing')) {
     redirect(new moodle_url('/mod/coassemble/library.php', ['id' => $cm->id]));
 }
 
+if ($mode === 'edit' && !$hascourse) {
+    require_capability('mod/coassemble:author', $context);
+    if (data_submitted()) {
+        \mod_coassemble\local\action::require_post();
+    } else {
+        $mode = 'choose';
+    }
+}
+
 $isedit = ($mode === 'edit');
 $PAGE->set_url('/mod/coassemble/view.php', ['id' => $cm->id, 'mode' => $mode]);
 $PAGE->set_title(format_string($instance->name));
@@ -113,7 +122,8 @@ if ($mode === 'choose') {
     $flowlinks = [];
     foreach (['' => 'flow_scratch', 'ai' => 'flow_ai', 'existing' => 'flow_existing'] as $key => $label) {
         $url = new moodle_url('/mod/coassemble/view.php', ['id' => $id, 'mode' => 'edit', 'flow' => $key]);
-        $flowlinks[] = ['url' => $url->out(false), 'label' => get_string($label, 'mod_coassemble')];
+        $flowlinks[] = ['url' => $url->out(false), 'label' => get_string($label, 'mod_coassemble'),
+            'post' => $key !== 'existing', 'sesskey' => sesskey()];
     }
     echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
         'label' => get_string('flow', 'mod_coassemble'), 'links' => $flowlinks,
@@ -295,6 +305,8 @@ if ($mode === 'edit') {
                 'label' => $flabel,
                 'primary' => $selectedflow === $fkey,
                 'current' => $selectedflow === $fkey,
+                'post' => $fkey !== 'existing',
+                'sesskey' => sesskey(),
             ];
         }
         echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [

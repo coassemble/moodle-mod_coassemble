@@ -28,6 +28,7 @@ require_once(__DIR__ . '/lib.php');
 $id = required_param('id', PARAM_INT);
 $action = optional_param('action', '', PARAM_ALPHA);
 $confirmed = optional_param('confirmed', 0, PARAM_BOOL);
+$expectedcourseid = optional_param('remoteid', 0, PARAM_INT);
 
 [$course, $cm] = get_course_and_cm_from_cmid($id, 'coassemble');
 $instance = $DB->get_record('coassemble', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -50,13 +51,16 @@ if ($action !== '') {
         redirect($PAGE->url, get_string('error_nocourseyet', 'mod_coassemble'), null, \core\output\notification::NOTIFY_ERROR);
     }
 
-    if (in_array($action, ['delete', 'unlink'], true) && !$confirmed) {
+    if ((int) $instance->coassemblecourseid !== $expectedcourseid) {
+        redirect($PAGE->url, get_string('error_coursechanged', 'mod_coassemble'), null, \core\output\notification::NOTIFY_ERROR);
+    }
+    if (in_array($action, ['delete', 'unlink', 'duplicate'], true) && !$confirmed) {
         echo $OUTPUT->header();
         echo $OUTPUT->confirm(
             get_string('manage_' . $action . '_confirm', 'mod_coassemble'),
             new single_button(
                 new moodle_url('/mod/coassemble/manage.php', [
-                'id' => $id, 'action' => $action, 'confirmed' => 1,
+                'id' => $id, 'action' => $action, 'confirmed' => 1, 'remoteid' => $expectedcourseid,
                 ]),
                 get_string('continue'),
                 'post'
@@ -213,6 +217,7 @@ if (!empty($instance->coassemblecourseid)) {
         $url = new moodle_url('/mod/coassemble/manage.php', [
             'id' => $cm->id,
             'action' => $act,
+            'remoteid' => (int) $instance->coassemblecourseid,
             'sesskey' => sesskey(),
         ]);
         echo $OUTPUT->single_button($url, get_string('manage_' . $act, 'mod_coassemble'), 'post');
@@ -220,6 +225,7 @@ if (!empty($instance->coassemblecourseid)) {
     $scormurl = new moodle_url('/mod/coassemble/manage.php', [
         'id' => $cm->id,
         'action' => 'scorm',
+        'remoteid' => (int) $instance->coassemblecourseid,
         'sesskey' => sesskey(),
     ]);
     echo $OUTPUT->single_button($scormurl, get_string('manage_scorm', 'mod_coassemble'), 'post');
@@ -245,7 +251,7 @@ if (!empty($instance->coassemblecourseid)) {
                 'flow' => $fkey,
             ]),
             $flabel,
-            'get'
+            $fkey === 'existing' ? 'get' : 'post'
         );
     }
     echo html_writer::end_div();

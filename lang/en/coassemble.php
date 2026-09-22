@@ -104,6 +104,7 @@ $string['manage_delete_linked'] = 'This activity links to a shared Coassemble co
 $string['manage_delete_ok'] = 'Course soft-deleted in Coassemble.';
 $string['manage_delete_shared'] = 'This course is also used by {$a} other activities. Unlink this activity instead of deleting the course.';
 $string['manage_duplicate'] = 'Duplicate';
+$string['manage_duplicate_confirm'] = 'Make a separate copy, switch this activity to it, and clear this activity’s local progress, grades and completion? The original course will remain unchanged.';
 $string['manage_duplicate_ok'] = 'Course duplicated and linked to this activity.';
 $string['manage_intro'] = 'Publish, duplicate, or export the Coassemble learning object linked to this activity.';
 $string['manage_publish'] = 'Publish';
