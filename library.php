@@ -151,7 +151,7 @@ foreach ($courses as $remote) {
     if ($reason) {
         $selection = html_writer::span(
             get_string($reason . '_badge', 'mod_coassemble'),
-            'badge badge-secondary bg-secondary text-white coassemble-library-badge'
+            'badge coassemble-library-badge'
         ) . ' ' . get_string($reason, 'mod_coassemble');
     }
     if (!$reason && $canselect) {

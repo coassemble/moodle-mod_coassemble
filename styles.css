@@ -71,6 +71,8 @@
 
 .path-mod-coassemble .coassemble-library-badge {
     margin-inline-end: 0.25rem;
+    color: #fff;
+    background: #595959;
 }
 
 .path-mod-coassemble.pagelayout-embedded #page {
