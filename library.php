@@ -46,6 +46,7 @@ if ($id) {
     require_login($course);
     $context = context_course::instance($course->id);
     require_capability('mod/coassemble:addinstance', $context);
+    require_capability('mod/coassemble:author', $context);
     $params = ['courseid' => $course->id];
 }
 $PAGE->set_context($context);
@@ -63,7 +64,11 @@ if ($action !== '') {
     }
     try {
         course_library::select($instance, $client, $remoteid, $action === 'copy');
-        redirect(new moodle_url('/mod/coassemble/manage.php', ['id' => $id]), get_string('library_selected', 'mod_coassemble'));
+        $destination = has_capability('mod/coassemble:manage', $context) ? 'manage.php' : 'view.php';
+        redirect(
+            new moodle_url('/mod/coassemble/' . $destination, ['id' => $id]),
+            get_string('library_selected', 'mod_coassemble')
+        );
     } catch (Throwable $e) {
         \mod_coassemble\local\diagnostics::log($e, 'library_select');
         $allowed = ['error_coursechanged', 'library_legacy', 'library_scorm', 'library_deleted', 'library_unavailable'];
@@ -74,9 +79,9 @@ if ($action !== '') {
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('library', 'mod_coassemble'));
-$backurl = $instance ? new moodle_url('/mod/coassemble/manage.php', ['id' => $id])
+$backurl = $instance ? new moodle_url('/mod/coassemble/view.php', ['id' => $id])
     : new moodle_url('/course/view.php', ['id' => $course->id]);
-echo html_writer::link($backurl, get_string($instance ? 'nav_manage' : 'backtocourse', 'mod_coassemble'));
+echo html_writer::link($backurl, get_string($instance ? 'backtoactivity' : 'backtocourse', 'mod_coassemble'));
 if ($error !== '') {
     echo $OUTPUT->notification($error, 'error');
 }

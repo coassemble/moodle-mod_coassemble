@@ -422,13 +422,15 @@ if ($canauthor) {
         // Non-fatal for the player chrome.
         $remote = null;
     }
-    $actions = [
-        ['view.php', 'nav_editcontent', ['mode' => 'edit']],
-        ['manage.php', 'nav_manage', []],
-        ['report.php', 'nav_report', []],
-        ['analytics.php', 'nav_analytics', []],
-    ];
-    foreach ($actions as [$page, $label, $params]) {
+}
+$actions = [
+    ['view.php', 'nav_editcontent', ['mode' => 'edit'], 'mod/coassemble:author'],
+    ['manage.php', 'nav_manage', [], 'mod/coassemble:manage'],
+    ['report.php', 'nav_report', [], 'mod/coassemble:manage'],
+    ['analytics.php', 'nav_analytics', [], 'mod/coassemble:viewanalytics'],
+];
+foreach ($actions as [$page, $label, $params, $capability]) {
+    if (has_capability($capability, $context)) {
         $chromelinks[] = [
             'url' => (new moodle_url('/mod/coassemble/' . $page, ['id' => $cm->id] + $params))->out(false),
             'label' => get_string($label, 'mod_coassemble'),

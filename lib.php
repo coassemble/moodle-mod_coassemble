@@ -509,7 +509,9 @@ function coassemble_extend_settings_navigation(settings_navigation $settings, na
             $url,
             navigation_node::TYPE_SETTING
         );
+    }
 
+    if (has_capability('mod/coassemble:manage', $context)) {
         $manageurl = new moodle_url('/mod/coassemble/manage.php', ['id' => $cm->id]);
         $nodenavigation->add(
             get_string('nav_manage', 'mod_coassemble'),
@@ -555,7 +557,7 @@ function coassemble_get_instances($courseid) {
  * @param context_course $context Course context
  */
 function mod_coassemble_extend_navigation_course($navigation, $course, $context) {
-    if (has_capability('mod/coassemble:addinstance', $context)) {
+    if (has_capability('mod/coassemble:addinstance', $context) && has_capability('mod/coassemble:author', $context)) {
         $navigation->add(
             get_string('library', 'mod_coassemble'),
             new moodle_url('/mod/coassemble/library.php', ['courseid' => $course->id]),
