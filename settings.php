@@ -59,4 +59,18 @@ if ($ADMIN->fulltree) {
         get_string('settings_testconnection', 'mod_coassemble'),
         html_writer::link($testurl, get_string('settings_testconnection_link', 'mod_coassemble'))
     ));
+
+    $settings->add(new admin_setting_heading(
+        'mod_coassemble/builderfeatures',
+        get_string('settings_builderfeatures', 'mod_coassemble'),
+        get_string('settings_builderfeatures_desc', 'mod_coassemble')
+    ));
+    foreach (['narrations', 'translations', 'brandvoice'] as $feature) {
+        $settings->add(new admin_setting_configcheckbox(
+            'mod_coassemble/' . $feature,
+            get_string('settings_' . $feature, 'mod_coassemble'),
+            get_string('settings_' . $feature . '_desc', 'mod_coassemble'),
+            1
+        ));
+    }
 }

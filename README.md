@@ -39,6 +39,20 @@ Data received from Coassemble: course metadata (titles, publish state), learner 
 | PHP | 8.1+ |
 | Coassemble plan | Paid subscription with API access **and** `api_authoring` |
 
+Optional builder features default to on and can be disabled under the plugin's
+site settings to match your Coassemble plan:
+
+| Builder feature | Additional Coassemble entitlements |
+|-----------------|------------------------------------|
+| Narrations | `narrations` |
+| Translations | `api_advanced` and `translations` |
+| Brand voice | `brand_kit` |
+
+These are in addition to `api` and `api_authoring`. The plugin cannot detect
+entitlements. Narration usage draws from the shared workspace allowance.
+Publishing is controlled by Moodle's `mod/coassemble:manage` capability; it has
+no separate feature setting or Coassemble publishing entitlement.
+
 ## Install
 
 See [INSTALL.md](INSTALL.md) for the full checklist.
@@ -58,11 +72,13 @@ Configure **Site administration → Plugins → Activity modules → Coassemble*
    paging. Legacy courses and hosted SCORM packages are visible but unavailable.
 4. Select **Use this course** to share the original, or **Make a copy** for a separate
    course. Editing or publishing a linked original changes it wherever it is used.
-5. Use **Manage content** to publish, revert, duplicate, unlink or export SCORM.
+5. Publish and revert inside the Coassemble builder. Use **Manage content** to
+   check publication status, duplicate, unlink or export SCORM.
    Remote deletion is available only for created/copied courses with no other
    Moodle activities pointing to them. Unlink leaves the remote course intact.
 6. Learners open the activity in the full-bleed player, with the Moodle course
-   name, activity name and return link visible in a slim bar.
+   name, activity name and return link visible in a slim bar. The course builder
+   uses the same full-window layout and Moodle context.
 
 Teachers can also open **Course → More → Coassemble course library** before
 adding an activity. The per-course **Coassemble activities** index shows course

@@ -74,14 +74,6 @@ if ($action !== '') {
     \mod_coassemble\local\course_metadata::invalidate($courseid);
     try {
         switch ($action) {
-            case 'publish':
-                $client->publish_course($courseid);
-                redirect($PAGE->url, get_string('manage_publish_ok', 'mod_coassemble'));
-                break;
-            case 'revert':
-                $client->revert_course($courseid);
-                redirect($PAGE->url, get_string('manage_revert_ok', 'mod_coassemble'));
-                break;
             case 'duplicate':
                 $dup = $client->duplicate_course($courseid, [
                     'identifier' => $identifier,
@@ -101,10 +93,6 @@ if ($action !== '') {
             case 'unlink':
                 \mod_coassemble\local\course_link::unlink($instance);
                 redirect($PAGE->url, get_string('manage_unlink_ok', 'mod_coassemble'));
-                break;
-            case 'restore':
-                $client->restore_course($courseid);
-                redirect($PAGE->url, get_string('manage_restore_ok', 'mod_coassemble'));
                 break;
             case 'scorm':
                 $binary = $client->export_scorm($courseid);
@@ -166,6 +154,8 @@ if (!empty($remoteerror)) {
 } else if ($remote) {
     if (empty($remote['published'])) {
         echo $OUTPUT->notification(get_string('status_unpublished', 'mod_coassemble'), 'warning');
+    } else if (!empty($remote['revision'])) {
+        echo $OUTPUT->notification(get_string('status_unpublishedchanges', 'mod_coassemble'), 'warning');
     } else {
         echo $OUTPUT->notification(get_string('status_published', 'mod_coassemble'), 'success');
     }
@@ -190,7 +180,13 @@ $table->data[] = [
 ];
 if ($remote) {
     $table->data[] = [get_string('manage_remote_title', 'mod_coassemble'), s($remote['title'] ?? '')];
-    $published = !empty($remote['published']) ? get_string('yes') : get_string('no');
+    $published = get_string('manage_notpublished', 'mod_coassemble');
+    if (!empty($remote['published'])) {
+        $published = get_string(
+            !empty($remote['revision']) ? 'manage_unpublishedchanges' : 'library_published',
+            'mod_coassemble'
+        );
+    }
     $table->data[] = [get_string('manage_remote_published', 'mod_coassemble'), $published];
 }
 if (!empty($instance->timeauthored)) {
@@ -209,7 +205,7 @@ echo html_writer::table($table);
 
 if (!empty($instance->coassemblecourseid)) {
     echo html_writer::start_div('coassemble-manage-actions');
-    $actions = ['publish', 'revert', 'duplicate', 'unlink', 'restore', 'refresh'];
+    $actions = ['duplicate', 'unlink', 'refresh'];
     if (in_array($instance->linkmode, ['created', 'copied'], true) && !$otheruses) {
         $actions[] = 'delete';
     }

@@ -2,7 +2,7 @@
 
 Declared support: `$plugin->supported = [401, 502]` — **Moodle 4.1 to 5.2**.
 Minimum: `$plugin->requires = 2022112800` (Moodle 4.1).
-Plugin release **1.4.0**, version `2026092200` (unreleased).
+Plugin release **1.4.0**, version `2026092201` (unreleased).
 
 | Moodle | PHP in CI | Coverage |
 |--------|-----------|----------|
@@ -31,9 +31,12 @@ so it works on both Bootstrap 4 and Bootstrap 5 without deprecated utilities.
 | Capability | Endpoint family | Entitlement |
 |------------|-----------------|-------------|
 | List / get courses | `GET /api/v1/headless/courses` | `api` |
-| Course builder embed | `POST /api/v1/headless/embed/course` `action=edit` | `api_authoring` |
+| Course builder embed | `POST /api/v1/headless/embed/course` `action=edit` | `api` and `api_authoring` |
 | Course player embed | `POST /api/v1/headless/embed/course` `action=view` | `api` |
-| Publish / revert | `POST /api/v1/headless/course/:id/publish` | `api_authoring` |
+| Builder publishing / revert | Course builder embed with publishing enabled | `api` and `api_authoring`; Moodle `mod/coassemble:manage` capability |
+| Builder narrations | Course builder embed with narrations enabled | `api`, `api_authoring` and `narrations` |
+| Builder translations | `/api/v1/headless/translations/*` and `/translation/*` | `api`, `api_authoring`, `api_advanced` and `translations` |
+| Builder brand voice | Course builder embed with brand voice enabled | `api`, `api_authoring` and `brand_kit` |
 | Trackings | `GET /api/v1/headless/trackings` | `api` |
 | Analytics embeds | `POST /api/v1/headless/embed/analytics/*` | analytics entitlement |
 | Collection embeds | `POST /api/v1/headless/embed/collection` | `api` / authoring for edit |
@@ -43,6 +46,10 @@ The library requires course-list and course-detail responses to include `legacy`
 and `type`. Missing compatibility fields leave a course visible but
 unavailable for selection. Copies use the existing course duplicate API and its
 workspace entitlement. No database changes are required on the Coassemble side.
+
+Narrations, translations and brand voice default to enabled in the plugin's site
+settings. Disable features your plan does not include; embed flags do not check
+entitlements. Narration usage is shared across the workspace's authors.
 
 ## Distribution
 

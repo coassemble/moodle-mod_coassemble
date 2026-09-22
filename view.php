@@ -213,16 +213,7 @@ if ($mode === 'collection') {
 if ($mode === 'edit') {
     require_capability('mod/coassemble:author', $context);
 
-    $options = [
-        'back' => 'event',
-        'legacy' => false,
-        'ai' => true,
-        'googleDrive' => true,
-        'oneDrive' => true,
-        'feedback' => true,
-        // No in-builder publishing: Moodle's Manage content page owns the
-        // publish/revert lifecycle (API default is already false).
-    ];
+    $options = \mod_coassemble\local\builder_options::for_context($context);
 
     if ($selectedflow !== '' && empty($instance->coassemblecourseid)) {
         $options['flow'] = $selectedflow;
@@ -277,9 +268,15 @@ if ($mode === 'edit') {
         ],
     ]]);
 
+    $PAGE->set_pagelayout('embedded');
+    $PAGE->activityheader->disable();
     echo $OUTPUT->header();
+    echo html_writer::start_div('coassemble-player-layout');
     echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
         'label' => get_string('modulename', 'mod_coassemble'),
+        'class' => 'coassemble-player-chrome',
+        'coursename' => format_string($course->fullname),
+        'activityname' => format_string($instance->name),
         'links' => [[
             'url' => $hascourse ? $backurl->out(false) : $exiturl->out(false),
             'label' => $hascourse ? get_string('backtoactivity', 'mod_coassemble') : $exitlabel,
@@ -326,6 +323,7 @@ if ($mode === 'edit') {
         'cmid' => (int) $cm->id,
         'sesskey' => sesskey(),
     ]);
+    echo html_writer::end_div();
     echo $OUTPUT->footer();
     exit;
 }

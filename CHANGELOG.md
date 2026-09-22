@@ -2,6 +2,16 @@
 
 ## 1.4.0 (unreleased)
 
+- Use the Coassemble brand mark as the monochrome Moodle activity icon.
+- Give the course builder the full-window player layout while retaining Moodle
+  course and activity context and a return link.
+- Add default-on site settings for narrations, translations and brand voice.
+  Enable in-builder publishing only for users with the manage capability.
+- Move publishing and revert into the builder. Remove the unused Restore action,
+  distinguish published courses with unpublished changes, and space management
+  buttons below the details table.
+- Badge unavailable library courses with their exclusion reason and space
+  pagination below the course table without overriding Moodle's row striping.
 - Add a native workspace course library with title search, paging, thumbnails,
   screen counts, publication state and last-modified dates. Legacy and hosted
   SCORM courses remain visible with an explanation but cannot be selected.
@@ -16,8 +26,9 @@
   referenced by another activity. Reject stale management forms.
 - Show cached course titles, publish state, relationship and progress-report
   links in the per-course activity index. Metadata expires after five minutes.
-- Keep learner delivery full-bleed with a slim Moodle course/activity context bar
-  and return link. Authoring and library pages retain standard Moodle navigation.
+- Keep learner delivery and authoring full-bleed with a slim Moodle
+  course/activity context bar and return link. Library pages retain standard
+  Moodle navigation.
 - Require POST and sesskey before creating new content as well as for link/copy
   and management changes. Recovery now requires an explicit course choice.
 - Fix API query separators under Moodle’s HTML-oriented PHP configuration, so

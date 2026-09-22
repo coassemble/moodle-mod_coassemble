@@ -13,10 +13,6 @@
     background: #fff;
 }
 
-.path-mod-coassemble .coassemble-embed-shell--edit .coassemble-embed-iframe {
-    height: 80vh;
-}
-
 .path-mod-coassemble .coassemble-toolbar {
     display: flex;
     align-items: center;
@@ -27,6 +23,11 @@
 
 .path-mod-coassemble .coassemble-player-chrome .coassemble-exit-authoring {
     margin-inline-end: auto;
+}
+
+.path-mod-coassemble .coassemble-manage-actions,
+.path-mod-coassemble .coassemble-library-pagination {
+    margin-block-start: 1rem;
 }
 
 .path-mod-coassemble .coassemble-manage-actions .btn,
@@ -66,7 +67,10 @@
 
 .path-mod-coassemble .coassemble-library-unavailable {
     color: #595959;
-    background: #f2f2f2;
+}
+
+.path-mod-coassemble .coassemble-library-badge {
+    margin-inline-end: 0.25rem;
 }
 
 .path-mod-coassemble.pagelayout-embedded #page {
