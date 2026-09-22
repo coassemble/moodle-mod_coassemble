@@ -115,7 +115,6 @@ $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [[
     'cmid' => (int) $cm->id,
     'statusElId' => 'coassemble-session-status',
     'strings' => [
-        'ready' => get_string('session_ready', 'mod_coassemble'),
         'error' => get_string('session_error', 'mod_coassemble'),
         'expired' => get_string('session_expired', 'mod_coassemble'),
     ],

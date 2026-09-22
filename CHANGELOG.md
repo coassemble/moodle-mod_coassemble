@@ -2,6 +2,7 @@
 
 ## 1.4.0 (unreleased)
 
+- Keep successful embed loads quiet; retain actionable expired-session and error messages.
 - Use the Coassemble brand mark as the monochrome Moodle activity icon.
 - Give the course builder the full-window player layout while retaining Moodle
   course and activity context and a return link.

@@ -164,7 +164,6 @@ $string['resolve_course'] = 'Choose a course to recover the link';
 $string['score'] = 'Score';
 $string['session_error'] = 'The Coassemble embed reported an error. Try reloading.';
 $string['session_expired'] = 'Your Coassemble session expired. Reload the page to continue.';
-$string['session_ready'] = 'Coassemble ready';
 $string['settings_apikey'] = 'API key';
 $string['settings_apikey_desc'] = 'Workspace API key from Coassemble API settings. Paste the full key — it starts with COASSEMBLE: and identifies your workspace.';
 $string['settings_apiurl'] = 'API base URL';

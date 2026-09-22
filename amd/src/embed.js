@@ -103,9 +103,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     const handleSessionEvent = (payload, statusEl, strings) => {
         const status = (payload.event || payload.status || '').toString().toLowerCase();
-        if (status === 'ready') {
-            setStatus(statusEl, strings.ready || 'Ready', 'ready');
-        } else if (status === 'expired') {
+        if (status === 'expired') {
             setStatus(statusEl, strings.expired || 'Session expired — reload the page.', 'expired');
         } else if (status === 'error') {
             setStatus(statusEl, strings.error || 'Embed error', 'error');

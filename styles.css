@@ -50,11 +50,6 @@
     display: none;
 }
 
-.path-mod-coassemble .coassemble-session-status--ready {
-    background: #ecfdf5;
-    color: #065f46;
-}
-
 .path-mod-coassemble .coassemble-session-status--error,
 .path-mod-coassemble .coassemble-session-status--expired {
     background: #fef2f2;
