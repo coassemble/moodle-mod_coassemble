@@ -142,4 +142,23 @@ final class course_link_test extends \advanced_testcase {
             $this->assertEquals(123, $DB->get_field('coassemble', 'coassemblecourseid', ['id' => $instance->id]));
         }
     }
+    /**
+     * Moodle's actual backup and restore path retains shared-course ownership.
+     */
+    public function test_backup_restore_preserves_origin(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/course/lib.php');
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        foreach (['created', 'linked', 'copied'] as $mode) {
+            $instance = $this->getDataGenerator()->create_module('coassemble', [
+                'course' => $course->id, 'coassemblecourseid' => 123, 'linkmode' => $mode,
+            ]);
+            $cm = get_coursemodule_from_instance('coassemble', $instance->id);
+            $restored = duplicate_module($course, $cm);
+            $this->assertSame($mode, $DB->get_field('coassemble', 'linkmode', ['id' => $restored->instance]));
+            $this->assertEquals(123, $DB->get_field('coassemble', 'coassemblecourseid', ['id' => $restored->instance]));
+        }
+    }
 }
