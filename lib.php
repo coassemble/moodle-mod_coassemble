@@ -497,7 +497,7 @@ function coassemble_reset_userdata($data) {
 }
 
 /**
- * Extend settings navigation with author / analytics links.
+ * Extend settings navigation with authoring and progress-report links.
  *
  * @param settings_navigation $settings
  * @param navigation_node $nodenavigation
@@ -533,15 +533,6 @@ function coassemble_extend_settings_navigation(settings_navigation $settings, na
         $nodenavigation->add(
             get_string('nav_report', 'mod_coassemble'),
             new moodle_url('/mod/coassemble/report.php', ['id' => $cm->id]),
-            navigation_node::TYPE_SETTING
-        );
-    }
-
-    if (has_capability('mod/coassemble:viewanalytics', $context)) {
-        $url = new moodle_url('/mod/coassemble/analytics.php', ['id' => $cm->id]);
-        $nodenavigation->add(
-            get_string('nav_analytics', 'mod_coassemble'),
-            $url,
             navigation_node::TYPE_SETTING
         );
     }

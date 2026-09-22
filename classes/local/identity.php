@@ -84,6 +84,24 @@ class identity {
     }
 
     /**
+     * Profile fields for in-session author presence, never learner playback.
+     *
+     * @param \stdClass $user Moodle user
+     * @param string $action Resolved embed action
+     * @return array
+     */
+    public static function profile_for_action(\stdClass $user, string $action): array {
+        if ($action !== 'edit') {
+            return [];
+        }
+        $profile = ['name' => self::display_name($user)];
+        if ($avatar = self::avatar_url($user)) {
+            $profile['avatar'] = $avatar;
+        }
+        return $profile;
+    }
+
+    /**
      * Resolve Moodle user id from a Headless identifier minted by this plugin.
      *
      * @param string $identifier

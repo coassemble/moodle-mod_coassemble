@@ -58,6 +58,7 @@ class provider implements
 
         $collection->add_database_table('coassemble_webhook', [], 'privacy:metadata:coassemble_webhook');
 
+        // Name and avatar describe authoring presence only; learner views send identifiers without a profile.
         $collection->add_external_location_link('coassemble', [
             'identifier' => 'privacy:metadata:external:identifier',
             'clientidentifier' => 'privacy:metadata:external:clientidentifier',

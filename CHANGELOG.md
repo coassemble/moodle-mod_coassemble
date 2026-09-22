@@ -2,6 +2,11 @@
 
 ## 1.4.0 (unreleased)
 
+- Remove external analytics embeds and their capability and navigation links.
+  Moodle progress reports, grades and completion tracking remain available.
+- Send names and avatars only for authoring embeds. Learner course and collection
+  requests retain pseudonymous identifiers without profile fields. Update the
+  privacy declaration; existing remote profile data is not erased.
 - Integrate with the Moodle 5.1+ Activities overview, reusing cached remote
   metadata and limiting author information to activity managers.
 - Use singular shared-course messages for one other activity and space the

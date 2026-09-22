@@ -57,9 +57,8 @@ $body = [
     'collectionId' => $collectionid,
     'identifier' => $identifier,
     'clientIdentifier' => $clientidentifier,
-    'name' => \mod_coassemble\local\identity::display_name($USER),
     'options' => ['back' => 'event'],
-];
+] + \mod_coassemble\local\identity::profile_for_action($USER, $action);
 
 try {
     $url = $client->issue_collection_embed($body);

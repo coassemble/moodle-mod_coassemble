@@ -3,7 +3,7 @@
 Coassemble for Moodle embeds course authoring and learner delivery in a Moodle
 activity. Teachers can create and manage content; learners take linked courses
 inside Moodle. Progress, completion and grades synchronise with Moodle, with
-course and learner analytics available to authorised staff.
+learner progress reports available to authorised staff in Moodle.
 
 The Coassemble plug-in requires a commercial subscription to Coassemble, with available plans for clients and partners. For more information, please contact [moodle@coassemble.com](mailto:moodle@coassemble.com), or visit [moodle.coassemble.com](http://moodle.coassemble.com).
 

@@ -134,8 +134,6 @@ if ($mode === 'choose') {
 
 $identifier = \mod_coassemble\local\identity::for_user($USER);
 $clientidentifier = \mod_coassemble\local\identity::client_identifier();
-$displayname = \mod_coassemble\local\identity::display_name($USER);
-$avatar = \mod_coassemble\local\identity::avatar_url($USER);
 
 // In singleactivity format the course page is this activity itself, so
 // "back" must leave the course entirely.
@@ -165,9 +163,8 @@ if ($mode === 'collection') {
             'collectionId' => (int) $instance->collectionid,
             'identifier' => $identifier,
             'clientIdentifier' => $clientidentifier,
-            'name' => $displayname,
             'options' => ['back' => 'event'],
-        ]);
+        ] + \mod_coassemble\local\identity::profile_for_action($USER, $action));
     } catch (Throwable $e) {
         \mod_coassemble\local\diagnostics::log($e, 'view');
         echo $OUTPUT->header();
@@ -225,9 +222,8 @@ if ($mode === 'edit') {
         'action' => 'edit',
         'identifier' => $identifier,
         'clientIdentifier' => $clientidentifier,
-        'name' => $displayname,
         'options' => $options,
-    ];
+    ] + \mod_coassemble\local\identity::profile_for_action($USER, 'edit');
     if (!empty($instance->coassemblecourseid)) {
         $body['courseId'] = (int) $instance->coassemblecourseid;
     }
@@ -350,7 +346,6 @@ $body = [
     'courseId' => (int) $instance->coassemblecourseid,
     'identifier' => $identifier,
     'clientIdentifier' => $clientidentifier,
-    'name' => $displayname,
     'options' => ['legacy' => false],
 ];
 if ($canauthor) {
@@ -362,9 +357,7 @@ if ($canauthor) {
     // would otherwise dead-end in place.
     $body['options']['back'] = 'hidden';
 }
-if ($avatar) {
-    $body['avatar'] = $avatar;
-}
+$body += \mod_coassemble\local\identity::profile_for_action($USER, $body['action']);
 if (!empty($instance->themeid)) {
     $body['themeId'] = (int) $instance->themeid;
 }
@@ -421,7 +414,6 @@ $actions = [
     ['view.php', 'nav_editcontent', ['mode' => 'edit'], 'mod/coassemble:author'],
     ['manage.php', 'nav_manage', [], 'mod/coassemble:manage'],
     ['report.php', 'nav_report', [], 'mod/coassemble:manage'],
-    ['analytics.php', 'nav_analytics', [], 'mod/coassemble:viewanalytics'],
 ];
 foreach ($actions as [$page, $label, $params, $capability]) {
     if (has_capability($capability, $context)) {

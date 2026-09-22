@@ -91,3 +91,11 @@ Feature: Coassemble activity basics
     And I should not see "Generate with AI"
     When I am on the "Test Coassemble" "coassemble activity editing" page
     Then the "Initial create flow" select box should not contain "Generate with AI"
+
+  Scenario: Teacher navigation retains local reports without external analytics
+    When I am on the "Test Coassemble" "coassemble activity" page logged in as teacher1
+    Then I should see "Progress report"
+    And I should not see "Analytics"
+    When I navigate to "Progress report" in current page administration
+    Then I should see "No learner progress has been recorded yet."
+    And I should not see "Analytics"

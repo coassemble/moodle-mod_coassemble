@@ -2,7 +2,7 @@
 
 Declared support: `$plugin->supported = [401, 502]` — **Moodle 4.1 to 5.2**.
 Minimum: `$plugin->requires = 2022112800` (Moodle 4.1).
-Plugin release **1.4.0**, version `2026092204` (unreleased).
+Plugin release **1.4.0**, version `2026092205` (unreleased).
 
 | Moodle | PHP in CI | Coverage |
 |--------|-----------|----------|
@@ -38,7 +38,6 @@ so it works on both Bootstrap 4 and Bootstrap 5 without deprecated utilities.
 | Builder translations | `/api/v1/headless/translations/*` and `/translation/*` | `api`, `api_authoring`, `api_advanced` and `translations` |
 | Builder brand voice | Course builder embed with brand voice enabled | `api`, `api_authoring` and `brand_kit` |
 | Trackings | `GET /api/v1/headless/trackings` | `api` |
-| Analytics embeds | `POST /api/v1/headless/embed/analytics/*` | analytics entitlement |
 | Collection embeds | `POST /api/v1/headless/embed/collection` | `api` / authoring for edit |
 | SCORM export | `GET /api/v1/headless/course/scorm/:id` | authoring / static SCORM rules |
 

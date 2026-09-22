@@ -246,35 +246,6 @@ class client {
     }
 
     /**
-     * Issue a signed analytics embed URL.
-     *
-     * @param string $kind course|collection|user
-     * @param array $body
-     * @return string
-     */
-    public function issue_analytics_embed($kind, array $body) {
-        switch ($kind) {
-            case 'course':
-                $path = '/api/v1/headless/embed/analytics/course';
-                break;
-            case 'collection':
-                $path = '/api/v1/headless/embed/analytics/collection';
-                break;
-            case 'user':
-                $path = '/api/v1/headless/embed/analytics/user';
-                break;
-            default:
-                throw new \coding_exception('Unknown analytics embed kind: ' . $kind);
-        }
-        $body = self::strip_empty_options($body);
-        $url = $this->request('POST', $path, $body, [], true);
-        if (!is_string($url) || $url === '') {
-            throw new \moodle_exception('error_embedurl', 'mod_coassemble');
-        }
-        return $url;
-    }
-
-    /**
      * Publish a course.
      *
      * @param int $courseid

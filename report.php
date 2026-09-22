@@ -60,7 +60,6 @@ $table->head = [
     get_string('commenced', 'mod_coassemble'),
     get_string('completed', 'mod_coassemble'),
     get_string('lastmodified'),
-    get_string('nav_analytics', 'mod_coassemble'),
 ];
 $table->data = [];
 
@@ -76,11 +75,6 @@ foreach ($tracks as $track) {
     if (!$user) {
         continue;
     }
-    $analyticsurl = new moodle_url('/mod/coassemble/analytics.php', [
-        'id' => $cm->id,
-        'kind' => 'user',
-        'userid' => $user->id,
-    ]);
     $scorecell = '—';
     if ($track->score !== null) {
         $scorecell = format_float((float) $track->score, 1) . '%';
@@ -95,7 +89,6 @@ foreach ($tracks as $track) {
         $track->commenced ? userdate($track->commenced) : '—',
         $track->completed ? userdate($track->completed) : '—',
         userdate($track->timemodified),
-        html_writer::link($analyticsurl, get_string('analytics_user', 'mod_coassemble')),
     ];
 }
 

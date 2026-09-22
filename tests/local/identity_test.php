@@ -71,4 +71,28 @@ final class identity_test extends \advanced_testcase {
     public function test_client_identifier(): void {
         $this->assertSame('moodle-site:' . identity::site_hash(), identity::client_identifier());
     }
+
+    /**
+     * Viewing content never includes profile fields, even for an author.
+     */
+    public function test_view_actions_omit_profile_fields(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Privacy', 'lastname' => 'Learner']);
+        foreach (['view', '', 'unknown'] as $action) {
+            $this->assertSame([], identity::profile_for_action($user, $action));
+        }
+    }
+
+    /**
+     * Resolved edit actions retain the author's in-session display profile.
+     */
+    public function test_edit_action_retains_author_profile(): void {
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Privacy', 'lastname' => 'Author']);
+        $profile = identity::profile_for_action($user, 'edit');
+        $this->assertSame('Privacy Author', $profile['name']);
+        $this->assertNotEmpty($profile['avatar']);
+        $this->assertSame(identity::avatar_url($user), $profile['avatar']);
+    }
 }

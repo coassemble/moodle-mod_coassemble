@@ -26,10 +26,15 @@ This plugin communicates with the **Coassemble** platform (an external, paid ser
 Data sent to Coassemble when users interact with an activity:
 
 - A **pseudonymous user identifier** derived from the Moodle user id and a site hash (`moodle:<sitehash>:<userid>`) — no username or email is included in the identifier.
-- The user's **display name** and (learner view only) **profile picture URL**, so the embedded player/builder can show them.
+- For **authoring sessions only** (`action: edit`), the author's display name and profile picture URL for in-session presence. Learner course and collection views omit both fields.
 - A **tenant identifier** derived from this Moodle site (one Coassemble tenant per site).
 
 Data received from Coassemble: course metadata (titles, publish state), learner progress/completion/score tracking, and signed embed URLs. Progress data is mirrored into the plugin's tables to drive Moodle grades and activity completion, and is covered by the Moodle Privacy API (export and deletion). See Coassemble's [privacy policy](https://coassemble.com/privacy-policy) for how the service handles data.
+
+Removing learner profile fields applies to future embed requests. It does not
+erase profile data previously stored by Coassemble. Moodle's gradebook, completion
+tracking and Progress report remain available; the external analytics embeds
+(including screen and question breakdowns) have been removed.
 
 ## Requirements
 
@@ -105,9 +110,8 @@ site; they cannot detect references from another site or the Coassemble web app.
 - Durable sync: webhook URL `/mod/coassemble/webhook.php` for `course.commenced` / `course.completed`.
 - Teachers: **Progress report** + **Refresh learner progress** (`GET /v1/headless/trackings`).
 
-## Analytics and collections
+## Collections
 
-- Course analytics embed + enrolled-user picker for user analytics.
 - Optional activity `collectionid` → `mode=collection` player/builder.
 - Advanced: `/mod/coassemble/collection.php?id=<cmid>&collectionid=<id>`.
 
@@ -125,7 +129,6 @@ site; they cannot detect references from another site or the Coassemble web app.
 | `mod/coassemble:view` | Open activity |
 | `mod/coassemble:author` | Launch builder |
 | `mod/coassemble:manage` | Publish / duplicate / SCORM / report / refresh |
-| `mod/coassemble:viewanalytics` | Analytics embed |
 | `mod/coassemble:addinstance` | Add activity to course |
 
 ## Security notes
