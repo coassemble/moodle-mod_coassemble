@@ -58,4 +58,29 @@ final class client_failure_test extends \advanced_testcase {
         $this->assertTrue($result['list_ok']);
         $this->assertStringNotContainsString('secret-token', json_encode($result));
     }
+    /**
+     * Moodle's HTML query separator must never leak into server-side API requests.
+     */
+    public function test_query_parameters_use_http_separators(): void {
+        global $CFG;
+        require_once($CFG->libdir . '/filelib.php');
+        $this->resetAfterTest();
+        $separator = ini_get('arg_separator.output');
+        ini_set('arg_separator.output', '&amp;');
+        try {
+            $curl = $this->getMockBuilder(\curl::class)->disableOriginalConstructor()
+                ->onlyMethods(['setHeader', 'setopt', 'get', 'get_info', 'get_errno'])->getMock();
+            $curl->expects($this->once())->method('get')->with(
+                'https://example.com/api/v1/headless/courses?title=Health+%26+safety&page=2&length=25'
+            )->willReturn('[]');
+            $curl->method('get_info')->willReturn(['http_code' => 200]);
+            $curl->method('get_errno')->willReturn(0);
+            $client = $this->getMockBuilder(client::class)->setConstructorArgs(['https://example.com', 'fixture'])
+                ->onlyMethods(['create_curl'])->getMock();
+            $client->method('create_curl')->willReturn($curl);
+            $this->assertSame([], $client->list_courses(['title' => 'Health & safety', 'page' => 2, 'length' => 25]));
+        } finally {
+            ini_set('arg_separator.output', $separator);
+        }
+    }
 }

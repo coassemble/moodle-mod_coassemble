@@ -463,6 +463,15 @@ class client {
     }
 
     /**
+     * Create the Moodle HTTP transport.
+     *
+     * @return \curl
+     */
+    protected function create_curl(): \curl {
+        return new \curl();
+    }
+
+    /**
      * Perform an HTTP request against the Headless API.
      *
      * @param string $method
@@ -483,10 +492,10 @@ class client {
 
         $url = $this->apiurl . $path;
         if (!empty($query)) {
-            $url .= (strpos($url, '?') !== false ? '&' : '?') . http_build_query($query);
+            $url .= (strpos($url, '?') !== false ? '&' : '?') . http_build_query($query, '', '&');
         }
 
-        $curl = new \curl();
+        $curl = $this->create_curl();
         $headers = [
             'Authorization: ' . $this->auth_header(),
             'Accept: application/json',
