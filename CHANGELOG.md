@@ -1,12 +1,33 @@
 # Changelog
 
-## 1.3.1 (unreleased)
+## 1.4.0 (unreleased)
+
+- Add a native workspace course library with title search, paging, thumbnails,
+  screen counts, publication state and last-modified dates. Legacy and hosted
+  SCORM courses remain visible with an explanation but cannot be selected.
+- Add “Use an existing course” to activity settings and creation choices. Browse
+  the library from the Moodle course menu without first adding an activity.
+- Offer “Use this course” and “Make a copy”, preserve the Moodle activity name,
+  and track created/linked/copied origins through upgrades and backup/restore.
+- Add Unlink with confirmation and clear local progress, grades and completion
+  when switching content. Prevent remote deletion of linked courses or courses
+  referenced by another activity. Reject stale management forms.
+- Show cached course titles, publish state, relationship and progress-report
+  links in the per-course activity index. Metadata expires after five minutes.
+- Keep learner delivery full-bleed with a slim Moodle course/activity context bar
+  and return link. Authoring and library pages retain standard Moodle navigation.
+- Require POST and sesskey before creating new content as well as for link/copy
+  and management changes. Recovery now requires an explicit course choice.
+- Fix API query separators under Moodle’s HTML-oriented PHP configuration, so
+  search, paging and tracking filters reach Coassemble correctly.
+
+Includes the previously unreleased 1.3.1 review fixes:
 
 - Require POST and sesskey validation for course recovery and management actions.
 - Keep API failures generic in pages and AJAX; record safe server diagnostics.
 - Use Moodle's file-send helper for SCORM downloads.
 - Render shared embed/navigation and the analytics picker with Mustache templates.
-- Preserve Moodle navigation during authoring and learning; announce session status.
+- Preserve Moodle navigation during authoring; announce session status.
 - Fix the activity icon under Moodle's monochrome filters and remove legacy spacing classes.
 - Add Moodle 5.2 and development 5.3 CI targets, explicit subscription documentation,
   directory copy and support contact details.

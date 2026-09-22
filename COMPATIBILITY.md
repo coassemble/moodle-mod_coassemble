@@ -2,7 +2,7 @@
 
 Declared support: `$plugin->supported = [401, 502]` — **Moodle 4.1 to 5.2**.
 Minimum: `$plugin->requires = 2022112800` (Moodle 4.1).
-Plugin release **1.3.1**, version `2026092100`.
+Plugin release **1.4.0**, version `2026092200` (unreleased).
 
 | Moodle | PHP in CI | Coverage |
 |--------|-----------|----------|
@@ -38,6 +38,11 @@ so it works on both Bootstrap 4 and Bootstrap 5 without deprecated utilities.
 | Analytics embeds | `POST /api/v1/headless/embed/analytics/*` | analytics entitlement |
 | Collection embeds | `POST /api/v1/headless/embed/collection` | `api` / authoring for edit |
 | SCORM export | `GET /api/v1/headless/course/scorm/:id` | authoring / static SCORM rules |
+
+The library requires course-list and course-detail responses to include `legacy`
+and `type`. Missing compatibility fields leave a course visible but
+unavailable for selection. Copies use the existing course duplicate API and its
+workspace entitlement. No database changes are required on the Coassemble side.
 
 ## Distribution
 

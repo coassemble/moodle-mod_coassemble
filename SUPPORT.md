@@ -12,7 +12,7 @@
 
 ### “Coassemble API credentials are not configured”
 
-- Empty workspace id or API key in Site administration → Plugins → Coassemble.
+- Empty API base URL or API key in Site administration → Plugins → Coassemble.
 
 ### Embed iframe blank / blocked
 
@@ -33,7 +33,9 @@
 
 - Rare if JWT decode failed and no `course.updated` postMessage arrived.
 
-**Fix:** Open **Manage content** is empty → reopen builder; or paste Coassemble course id into the activity settings field `coassemblecourseid`, save, reopen.
+**Fix:** Open **Manage content → Use an existing course**, search for the course
+and choose **Use this course**. Recovery is explicit; the plugin no longer links
+whichever course the author updated most recently.
 
 ### Completion / grades not updating
 
@@ -57,6 +59,27 @@
 
 - SCORM export is a teacher convenience, not the primary delivery path.
 - Requires appropriate Coassemble entitlements (`api_authoring` / static SCORM rules on the API).
+
+### A library course is unavailable
+
+- Legacy Builder 1 courses and hosted SCORM packages cannot be opened by this integration.
+- If compatibility cannot be verified, check that the deployed course-list and
+  course-detail endpoints include `legacy` and `type`.
+- Courses remain visible with a reason; a forged selection request is also rejected.
+
+### Delete is unavailable or blocked
+
+Linked originals cannot be deleted from Moodle. Created/copied courses also
+cannot be deleted while another activity in this Moodle site references them.
+Use **Unlink** to detach only this activity. Confirming Unlink clears its local
+progress, grades and completion, leaving remote content and learner records intact.
+
+### The index shows old titles or publication state
+
+Summaries are cached for up to five minutes. Use **Manage content → Refresh
+metadata** to expire that course's cached summary. The cache is separated by
+configured API host and workspace credentials. Missing or failed requests show
+“Course details unavailable” without exposing service diagnostics.
 
 ## Logging
 

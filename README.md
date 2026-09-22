@@ -51,12 +51,28 @@ Configure **Site administration → Plugins → Activity modules → Coassemble*
 
 ## Teacher flow (core)
 
-1. Add a **Coassemble** activity to a Moodle course.
-2. Open the activity → Course Builder embed loads inside the Moodle course page (`POST /api/v1/headless/embed/course`, `action: edit`).
-3. Pick a create flow: start from scratch or generate with AI. New courses use Builder 2.
-4. The plugin stores the Coassemble `courseId` (JWT claim and/or `course.updated` postMessage). Fallback: **Find linked course from Coassemble**.
-5. Use **Manage content** to publish, revert, duplicate, soft-delete, restore, or download SCORM.
-6. Learners open the same activity to take the course in the player embed.
+1. Add a **Coassemble** activity and save its name, description, grading and initial create flow.
+2. Choose **Start from scratch**, **Generate with AI**, or **Use an existing course**.
+   New content uses Builder 2; opening the activity alone does not create a draft.
+3. The existing-course path opens a native Moodle library with title search and
+   paging. Legacy courses and hosted SCORM packages are visible but unavailable.
+4. Select **Use this course** to share the original, or **Make a copy** for a separate
+   course. Editing or publishing a linked original changes it wherever it is used.
+5. Use **Manage content** to publish, revert, duplicate, unlink or export SCORM.
+   Remote deletion is available only for created/copied courses with no other
+   Moodle activities pointing to them. Unlink leaves the remote course intact.
+6. Learners open the activity in the full-bleed player, with the Moodle course
+   name, activity name and return link visible in a slim bar.
+
+Teachers can also open **Course → More → Coassemble course library** before
+adding an activity. The per-course **Coassemble activities** index shows course
+titles, publication state, origin and progress-report links; metadata is cached
+for up to five minutes and refreshed after local content changes.
+
+Unlinking or switching to a duplicate clears that activity's local progress,
+grades and completion, with confirmation. It does not delete the original
+Coassemble course or its learner records. Shared-course counts cover this Moodle
+site; they cannot detect references from another site or the Coassemble web app.
 
 ## Learner delivery
 
