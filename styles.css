@@ -70,6 +70,11 @@
     background: #595959;
 }
 
+.path-mod-coassemble .coassemble-library-choice,
+.path-mod-coassemble .coassemble-library-back {
+    margin-block-start: 1.25rem;
+}
+
 .path-mod-coassemble.pagelayout-embedded #page {
     padding: 0;
 }

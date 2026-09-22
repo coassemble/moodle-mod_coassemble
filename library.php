@@ -101,20 +101,28 @@ if ($remoteid && $canselect) {
             echo $OUTPUT->notification(get_string($reason, 'mod_coassemble'), 'warning');
         } else {
             echo $OUTPUT->heading(s($remote['title'] ?? get_string('library_untitled', 'mod_coassemble')), 3);
+            echo html_writer::start_div('coassemble-library-choice');
             echo html_writer::tag('p', get_string('library_link_help', 'mod_coassemble'));
             echo $OUTPUT->single_button(new moodle_url('/mod/coassemble/library.php', $params + [
                 'remoteid' => $remoteid, 'action' => 'link',
             ]), get_string('library_link', 'mod_coassemble'), 'post');
+            echo html_writer::end_div();
+            echo html_writer::start_div('coassemble-library-choice');
             echo html_writer::tag('p', get_string('library_copy_help', 'mod_coassemble'));
             echo $OUTPUT->single_button(new moodle_url('/mod/coassemble/library.php', $params + [
                 'remoteid' => $remoteid, 'action' => 'copy',
             ]), get_string('library_copy', 'mod_coassemble'), 'post');
+            echo html_writer::end_div();
         }
     } catch (Throwable $e) {
         \mod_coassemble\local\diagnostics::log($e, 'library_course');
         echo $OUTPUT->notification(get_string('error_apirequest', 'mod_coassemble'), 'error');
     }
-    echo html_writer::link($PAGE->url, get_string('library_back', 'mod_coassemble'));
+    echo html_writer::tag(
+        'p',
+        html_writer::link($PAGE->url, get_string('library_back', 'mod_coassemble')),
+        ['class' => 'coassemble-library-back']
+    );
     echo $OUTPUT->footer();
     exit;
 }

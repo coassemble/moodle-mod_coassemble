@@ -13,6 +13,7 @@
   buttons below the details table.
 - Badge unavailable library courses with their exclusion reason and space
   pagination below the course table without overriding Moodle's row striping.
+  Separate link/copy confirmation choices and the back link.
 - Add a native workspace course library with title search, paging, thumbnails,
   screen counts, publication state and last-modified dates. Legacy and hosted
   SCORM courses remain visible with an explanation but cannot be selected.
