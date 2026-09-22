@@ -146,7 +146,8 @@ foreach ($courses as $remote) {
     if (!$reason && $canselect) {
         $selection = html_writer::link(new moodle_url('/mod/coassemble/library.php', $params + [
             'remoteid' => (int) $remote['id'], 'title' => $title, 'page' => $page,
-        ]), get_string('choose'), ['class' => 'btn btn-secondary']);
+        ]), get_string('choose'), ['class' => 'btn btn-secondary',
+            'aria-label' => get_string('library_choose', 'mod_coassemble', $remote['title'] ?? '')]);
     }
     $row = new html_table_row([$image, s($remote['title'] ?? get_string('library_untitled', 'mod_coassemble')),
         count($screens), get_string(!empty($remote['published']) ? 'library_published' : 'library_draft', 'mod_coassemble'),
@@ -170,5 +171,7 @@ if (count($courses) === course_library::PAGE_SIZE) {
     $url = new moodle_url('/mod/coassemble/library.php', $params + ['title' => $title, 'page' => $page + 1]);
     $links[] = ['url' => $url->out(false), 'label' => get_string('next')];
 }
-echo $OUTPUT->render_from_template('mod_coassemble/toolbar', ['label' => get_string('pages'), 'links' => $links]);
+echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
+    'label' => get_string('library_pages', 'mod_coassemble'), 'links' => $links,
+]);
 echo $OUTPUT->footer();
