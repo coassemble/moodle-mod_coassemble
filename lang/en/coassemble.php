@@ -155,7 +155,6 @@ $string['refresh_progress'] = 'Refresh learner progress from Coassemble';
 $string['refresh_progress_ok'] = 'Progress refreshed for {$a} learner(s).';
 $string['report_empty'] = 'No learner progress has been recorded yet.';
 $string['reset_tracks'] = 'Delete Coassemble progress and completion records';
-$string['resolve_course'] = 'Choose a course to recover the link';
 $string['score'] = 'Score';
 $string['session_error'] = 'The Coassemble embed reported an error. Try reloading.';
 $string['session_expired'] = 'Your Coassemble session expired. Reload the page to continue.';

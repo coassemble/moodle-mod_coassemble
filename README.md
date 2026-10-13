@@ -40,7 +40,7 @@ tracking and Progress report remain available; the external analytics embeds
 
 | Component | Version |
 |-----------|---------|
-| Moodle | 4.1 – 5.2 (`$plugin->supported`) |
+| Moodle | 4.1 – 5.3 (`$plugin->supported`) |
 | PHP | 8.1+ |
 | Coassemble plan | Paid subscription with API access **and** `api_authoring` |
 
@@ -78,8 +78,9 @@ Configure **Site administration → Plugins → Activity modules → Coassemble*
 ## Teacher flow (core)
 
 1. Add a **Coassemble** activity and save its name, description, grading and initial create flow.
-2. Choose **Start from scratch**, **Generate with AI**, or **Use an existing course**.
-   New content uses Builder 2; opening the activity alone does not create a draft.
+2. **Save and display** opens the selected **Start from scratch**, **Generate with AI**,
+   or **Use an existing course** flow directly. New content uses Builder 2. Opening
+   an unlinked activity without saving offers creation choices before creating a draft.
 3. The existing-course path opens a native Moodle library with title search and
    paging. Legacy courses and hosted SCORM packages are visible but unavailable.
 4. Select **Use this course** to share the original, or **Make a copy** for a separate
@@ -88,9 +89,8 @@ Configure **Site administration → Plugins → Activity modules → Coassemble*
    check publication status, duplicate, unlink or export SCORM.
    Remote deletion is available only for created/copied courses with no other
    Moodle activities pointing to them. Unlink leaves the remote course intact.
-6. Learners open the activity in the full-bleed player, with the Moodle course
-   name, activity name and return link visible in a slim bar. The course builder
-   uses the same full-window layout and Moodle context.
+6. Learner, builder and collection views retain Moodle’s standard course navigation,
+   breadcrumbs, activity header, completion information and footer.
 
 Teachers can also open **Course → More → Coassemble course library** before
 adding an activity. The per-course **Coassemble activities** index shows course
@@ -108,12 +108,17 @@ site; they cannot detect references from another site or the Coassemble web app.
 - Progress / commencement / completion via `window.postMessage` (object or JSON string; tolerates `complete` / `completed`).
 - Gradebook item mirrors progress; custom completion rule “must complete Coassemble course”.
 - Durable sync: webhook URL `/mod/coassemble/webhook.php` for `course.commenced` / `course.completed`.
+- Reports honour activity/course group mode, grouping and `moodle/site:accessallgroups`.
+  In separate groups, teachers can report only on learners in their permitted groups.
 - Teachers: **Progress report** + **Refresh learner progress** (`GET /v1/headless/trackings`).
 
 ## Collections
 
-- Optional activity `collectionid` → `mode=collection` player/builder.
-- Advanced: `/mod/coassemble/collection.php?id=<cmid>&collectionid=<id>`.
+- Existing activity `collectionid` values use `view.php?id=<cmid>&mode=collection`.
+  The collection ID is read only from the activity; URL parameters cannot select
+  another workspace collection. Manage content links to that configured collection.
+- The standalone `collection.php` endpoint has been removed. There is no collection
+  picker in the activity settings.
 
 ## Identity mapping
 

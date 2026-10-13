@@ -56,6 +56,7 @@ class course_link {
         if (empty($instance->timeauthored)) {
             $instance->timeauthored = $instance->timemodified;
         }
+        $title = \core_text::substr(clean_param($title, PARAM_TEXT), 0, 255);
         if ($title !== '') {
             $instance->name = $title;
         }

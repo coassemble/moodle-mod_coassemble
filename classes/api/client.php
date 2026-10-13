@@ -30,6 +30,9 @@ namespace mod_coassemble\api;
  * The workspace API key must never be sent to the browser.
  */
 class client {
+    /** @var string Base path for the Headless API. */
+    private const API_BASE = '/api/v1/headless';
+
     /** @var string */
     private $apiurl;
 
@@ -160,7 +163,7 @@ class client {
      * @return array
      */
     public function list_courses(array $query = []) {
-        $result = $this->request('GET', '/api/v1/headless/courses', null, $query);
+        $result = $this->request('GET', self::API_BASE . '/courses', null, $query);
         if (!is_array($result)) {
             return [];
         }
@@ -178,7 +181,7 @@ class client {
      * @return array
      */
     public function get_course($courseid, array $query = []) {
-        $result = $this->request('GET', '/api/v1/headless/courses/' . (int) $courseid, null, $query);
+        $result = $this->request('GET', self::API_BASE . '/courses/' . (int) $courseid, null, $query);
         return is_array($result) ? $result : [];
     }
 
@@ -220,7 +223,7 @@ class client {
      */
     public function issue_course_embed(array $body) {
         $body = self::force_builder2_options($body);
-        $url = $this->request('POST', '/api/v1/headless/embed/course', $body, [], true);
+        $url = $this->request('POST', self::API_BASE . '/embed/course', $body, [], true);
         if (!is_string($url) || $url === '') {
             throw new \moodle_exception('error_embedurl', 'mod_coassemble');
         }
@@ -238,7 +241,7 @@ class client {
      */
     public function issue_collection_embed(array $body) {
         $body = self::strip_empty_options($body);
-        $url = $this->request('POST', '/api/v1/headless/embed/collection', $body, [], true);
+        $url = $this->request('POST', self::API_BASE . '/embed/collection', $body, [], true);
         if (!is_string($url) || $url === '') {
             throw new \moodle_exception('error_embedurl', 'mod_coassemble');
         }
@@ -252,7 +255,7 @@ class client {
      * @return array
      */
     public function publish_course($courseid) {
-        $result = $this->request('POST', '/api/v1/headless/course/' . (int) $courseid . '/publish');
+        $result = $this->request('POST', self::API_BASE . '/course/' . (int) $courseid . '/publish');
         return is_array($result) ? $result : [];
     }
 
@@ -263,7 +266,7 @@ class client {
      * @return array
      */
     public function revert_course($courseid) {
-        $result = $this->request('POST', '/api/v1/headless/course/' . (int) $courseid . '/revert');
+        $result = $this->request('POST', self::API_BASE . '/course/' . (int) $courseid . '/revert');
         return is_array($result) ? $result : [];
     }
 
@@ -275,7 +278,7 @@ class client {
      * @return array
      */
     public function duplicate_course($courseid, array $body = []) {
-        $result = $this->request('POST', '/api/v1/headless/course/' . (int) $courseid . '/duplicate', $body);
+        $result = $this->request('POST', self::API_BASE . '/course/' . (int) $courseid . '/duplicate', $body);
         return is_array($result) ? $result : [];
     }
 
@@ -286,7 +289,7 @@ class client {
      * @return array
      */
     public function delete_course($courseid) {
-        $result = $this->request('DELETE', '/api/v1/headless/course/' . (int) $courseid);
+        $result = $this->request('DELETE', self::API_BASE . '/course/' . (int) $courseid);
         return is_array($result) ? $result : [];
     }
 
@@ -297,7 +300,7 @@ class client {
      * @return array
      */
     public function restore_course($courseid) {
-        $result = $this->request('POST', '/api/v1/headless/course/' . (int) $courseid . '/restore');
+        $result = $this->request('POST', self::API_BASE . '/course/' . (int) $courseid . '/restore');
         return is_array($result) ? $result : [];
     }
 
@@ -312,7 +315,7 @@ class client {
     public function export_scorm($courseid, $type = 'dynamic', $version = '2004') {
         return $this->request(
             'GET',
-            '/api/v1/headless/course/scorm/' . (int) $courseid,
+            self::API_BASE . '/course/scorm/' . (int) $courseid,
             null,
             ['type' => $type, 'version' => $version],
             false,
@@ -327,7 +330,7 @@ class client {
      * @return array
      */
     public function list_trackings(array $query = []) {
-        $result = $this->request('GET', '/api/v1/headless/trackings', null, $query);
+        $result = $this->request('GET', self::API_BASE . '/trackings', null, $query);
         if (!is_array($result)) {
             return [];
         }
@@ -343,7 +346,7 @@ class client {
      * @return array ['events' => [...], 'endpoints' => [...]]
      */
     public function list_webhooks() {
-        $result = $this->request('GET', '/api/v1/headless/webhooks');
+        $result = $this->request('GET', self::API_BASE . '/webhooks');
         return is_array($result) ? $result : ['events' => [], 'endpoints' => []];
     }
 
@@ -356,7 +359,7 @@ class client {
      * @return array Endpoint incl. 'secret'
      */
     public function create_webhook($url, array $events) {
-        $result = $this->request('POST', '/api/v1/headless/webhooks', [
+        $result = $this->request('POST', self::API_BASE . '/webhooks', [
             'url' => $url,
             'events' => array_values($events),
             'enabled' => true,
@@ -374,7 +377,7 @@ class client {
      * @return void
      */
     public function delete_webhook($endpointid) {
-        $this->request('DELETE', '/api/v1/headless/webhooks/' . (int) $endpointid);
+        $this->request('DELETE', self::API_BASE . '/webhooks/' . (int) $endpointid);
     }
 
     /**
@@ -383,7 +386,7 @@ class client {
      * @return array
      */
     public function list_themes() {
-        $result = $this->request('GET', '/api/v1/headless/themes');
+        $result = $this->request('GET', self::API_BASE . '/themes');
         if (!is_array($result)) {
             return [];
         }

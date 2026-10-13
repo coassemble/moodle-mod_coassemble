@@ -1,0 +1,52 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_coassemble/library_courses
+
+    Workspace library courses and selection actions.
+
+    Context variables required for this template:
+    * courses - Course rows with title, thumbnail, screens, status, updated and optional availability or choice
+
+    Example context (json):
+    {"courses":[{"title":"Safety","screens":4,"status":"Published","updated":"Today","chooseurl":"#","chooselabel":"Choose Safety"}]}
+}}
+<table class="generaltable">
+    <thead><tr>
+        <th scope="col">{{#str}}library_thumbnail, mod_coassemble{{/str}}</th>
+        <th scope="col">{{#str}}name{{/str}}</th>
+        <th scope="col">{{#str}}library_screens, mod_coassemble{{/str}}</th>
+        <th scope="col">{{#str}}library_status, mod_coassemble{{/str}}</th>
+        <th scope="col">{{#str}}lastmodified{{/str}}</th>
+        <th scope="col">{{#str}}actions{{/str}}</th>
+    </tr></thead>
+    <tbody>
+    {{#courses}}
+        <tr{{#reason}} class="coassemble-library-unavailable"{{/reason}}>
+            <td>{{#thumbnail}}<img src="{{thumbnail}}" alt="" width="96" height="54" loading="lazy" class="coassemble-library-thumbnail">{{/thumbnail}}</td>
+            <td>{{title}}</td>
+            <td>{{screens}}</td>
+            <td>{{status}}</td>
+            <td>{{updated}}</td>
+            <td>
+                {{#reason}}<span class="badge coassemble-library-badge">{{badge}}</span> {{reason}}{{/reason}}
+                {{#chooseurl}}<a href="{{chooseurl}}" class="btn btn-secondary" aria-label="{{chooselabel}}">{{#str}}choose{{/str}}</a>{{/chooseurl}}
+            </td>
+        </tr>
+    {{/courses}}
+    </tbody>
+</table>

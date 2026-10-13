@@ -38,10 +38,12 @@ $PAGE->set_url('/mod/coassemble/report.php', ['id' => $cm->id]);
 $PAGE->set_title(get_string('nav_report', 'mod_coassemble'));
 $PAGE->set_heading(format_string($course->fullname));
 
-$tracks = $DB->get_records('coassemble_track', ['coassembleid' => $instance->id], 'timemodified DESC');
+$currentgroup = (int) groups_get_activity_group($cm, true);
+$tracks = \mod_coassemble\local\progress_report::get_tracks($cm, $currentgroup);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('nav_report', 'mod_coassemble'));
+groups_print_activity_menu($cm, $PAGE->url);
 
 echo html_writer::div(
     $OUTPUT->single_button(

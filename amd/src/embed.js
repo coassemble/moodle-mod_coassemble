@@ -20,7 +20,7 @@
  * @copyright  2026 Coassemble
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
+define(['core/ajax', 'core/notification', 'core/str'], function(Ajax, Notification, Str) {
     /**
      * Parse a postMessage payload into an object, tolerating JSON strings.
      *
@@ -104,9 +104,9 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     const handleSessionEvent = (payload, statusEl, strings) => {
         const status = (payload.event || payload.status || '').toString().toLowerCase();
         if (status === 'expired') {
-            setStatus(statusEl, strings.expired || 'Session expired — reload the page.', 'expired');
+            setStatus(statusEl, strings.expired, 'expired');
         } else if (status === 'error') {
-            setStatus(statusEl, strings.error || 'Embed error', 'error');
+            setStatus(statusEl, strings.error, 'error');
         }
     };
 
@@ -165,7 +165,11 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             return;
         }
         const statusEl = config.statusElId ? document.getElementById(config.statusElId) : null;
-        const strings = config.strings || {};
+        const strings = Str.get_strings([
+            {key: 'session_error', component: 'mod_coassemble'},
+            {key: 'session_expired', component: 'mod_coassemble'},
+        ]).then(messages => ({error: messages[0], expired: messages[1]}));
+        strings.catch(Notification.exception);
 
         const onMessage = (event) => {
             if (config.expectedOrigin && event.origin !== config.expectedOrigin) {
@@ -188,7 +192,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                     window.location.href = config.backUrl;
                 }
             } else if (payload.type === 'session') {
-                handleSessionEvent(payload, statusEl, strings);
+                strings.then(messages => handleSessionEvent(payload, statusEl, messages)).catch(Notification.exception);
             } else if (payload.type === 'course' && config.mode === 'edit' && config.persistCourse) {
                 handleCourseEditEvent(payload, config);
             } else if (payload.type === 'course' && config.mode === 'view' && config.syncProgress) {

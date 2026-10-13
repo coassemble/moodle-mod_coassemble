@@ -1,0 +1,56 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_coassemble/manage
+
+    Activity metadata and permitted content-management actions.
+
+    Context variables required for this template:
+    * rows - Metadata rows with label, value and optional url
+    * actions - POST actions with url, label and fields
+    * flows - Creation choices with url, label, post and fields
+
+    Example context (json):
+    {"rows":[{"label":"Name","value":"Safety"}],"actions":[{"url":"#","label":"Refresh","fields":[{"name":"id","value":2}]}]}
+}}
+<table class="generaltable">
+    <tbody>
+    {{#rows}}
+        <tr>
+            <th scope="row">{{label}}</th>
+            <td>{{#url}}<a href="{{url}}">{{value}}</a>{{/url}}{{^url}}{{value}}{{/url}}</td>
+        </tr>
+    {{/rows}}
+    </tbody>
+</table>
+<div class="coassemble-manage-actions">
+    {{#actions}}
+    <form method="post" action="{{url}}" class="singlebutton">
+        {{#fields}}<input type="hidden" name="{{name}}" value="{{value}}">{{/fields}}
+        <button type="submit" class="btn btn-secondary">{{label}}</button>
+    </form>
+    {{/actions}}
+    {{#flows}}
+        {{#post}}
+        <form method="post" action="{{url}}" class="singlebutton">
+            {{#fields}}<input type="hidden" name="{{name}}" value="{{value}}">{{/fields}}
+            <button type="submit" class="btn btn-secondary">{{label}}</button>
+        </form>
+        {{/post}}
+        {{^post}}<a href="{{url}}" class="btn btn-secondary">{{label}}</a>{{/post}}
+    {{/flows}}
+</div>

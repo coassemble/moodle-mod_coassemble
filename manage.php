@@ -104,9 +104,11 @@ if ($action !== '') {
                 if (!empty($instance->coassemblecourseid)) {
                     $remote = $client->get_course((int) $instance->coassemblecourseid);
                     if (!empty($remote['title'])) {
-                        $instance->name = $remote['title'];
-                        $instance->timemodified = time();
-                        $DB->update_record('coassemble', $instance);
+                        $instance = \mod_coassemble\local\course_link::persist(
+                            $instance,
+                            (int) $instance->coassemblecourseid,
+                            (string) $remote['title']
+                        );
                     }
                 }
                 redirect($PAGE->url, get_string('manage_refresh_ok', 'mod_coassemble'));
@@ -144,7 +146,9 @@ if (!empty($instance->coassemblecourseid) && $client->is_configured()) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('nav_manage', 'mod_coassemble'));
 
-echo html_writer::tag('p', get_string('manage_intro', 'mod_coassemble'));
+echo $OUTPUT->render_from_template('mod_coassemble/library_intro', [
+    'intro' => get_string('manage_intro', 'mod_coassemble'),
+]);
 if (!empty($instance->coassemblecourseid) && $instance->linkmode === 'linked') {
     echo $OUTPUT->notification(get_string('library_link_help', 'mod_coassemble'), 'warning');
 }
@@ -161,29 +165,28 @@ if (!empty($remoteerror)) {
     }
 }
 
-$table = new html_table();
-$table->attributes['class'] = 'generaltable';
-$table->data = [];
-$table->data[] = [get_string('name'), format_string($instance->name)];
+$rows = [['label' => get_string('name'), 'value' => $instance->name]];
 $otheruses = \mod_coassemble\local\course_link::other_uses($instance);
 if (!empty($instance->coassemblecourseid)) {
-    $table->data[] = [get_string('linkmode', 'mod_coassemble'),
-        get_string(
-            'linkmode_' . $instance->linkmode . ($instance->linkmode === 'linked' && $otheruses === 1 ? '_singular' : ''),
+    $rows[] = ['label' => get_string('linkmode', 'mod_coassemble'), 'value' => get_string(
+        'linkmode_' . $instance->linkmode . ($instance->linkmode === 'linked' && $otheruses === 1 ? '_singular' : ''),
+        'mod_coassemble',
+        $otheruses
+    )];
+    if ($instance->linkmode !== 'linked' && $otheruses) {
+        $rows[] = ['label' => get_string('manage_shared', 'mod_coassemble'), 'value' => get_string(
+            $otheruses === 1 ? 'manage_delete_shared_singular' : 'manage_delete_shared',
             'mod_coassemble',
             $otheruses
         )];
-    if ($instance->linkmode !== 'linked' && $otheruses) {
-        $table->data[] = [get_string('manage_shared', 'mod_coassemble'),
-            get_string($otheruses === 1 ? 'manage_delete_shared_singular' : 'manage_delete_shared', 'mod_coassemble', $otheruses)];
     }
 }
-$table->data[] = [
-    get_string('coassemblecourseid', 'mod_coassemble'),
-    $instance->coassemblecourseid ? (int) $instance->coassemblecourseid : get_string('notyetlinked', 'mod_coassemble'),
+$rows[] = [
+    'label' => get_string('coassemblecourseid', 'mod_coassemble'),
+    'value' => $instance->coassemblecourseid ? (int) $instance->coassemblecourseid : get_string('notyetlinked', 'mod_coassemble'),
 ];
 if ($remote) {
-    $table->data[] = [get_string('manage_remote_title', 'mod_coassemble'), s($remote['title'] ?? '')];
+    $rows[] = ['label' => get_string('manage_remote_title', 'mod_coassemble'), 'value' => $remote['title'] ?? ''];
     $published = get_string('manage_notpublished', 'mod_coassemble');
     if (!empty($remote['published'])) {
         $published = get_string(
@@ -191,78 +194,53 @@ if ($remote) {
             'mod_coassemble'
         );
     }
-    $table->data[] = [get_string('manage_remote_published', 'mod_coassemble'), $published];
+    $rows[] = ['label' => get_string('manage_remote_published', 'mod_coassemble'), 'value' => $published];
 }
 if (!empty($instance->timeauthored)) {
-    $table->data[] = [get_string('timeauthored', 'mod_coassemble'), userdate($instance->timeauthored)];
+    $rows[] = ['label' => get_string('timeauthored', 'mod_coassemble'), 'value' => userdate($instance->timeauthored)];
 }
 if (!empty($instance->collectionid)) {
-    $table->data[] = [
-        get_string('collectionid', 'mod_coassemble'),
-        html_writer::link(
-            new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'mode' => 'collection']),
-            (int) $instance->collectionid
-        ),
+    $rows[] = [
+        'label' => get_string('collectionid', 'mod_coassemble'), 'value' => (int) $instance->collectionid,
+        'url' => (new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'mode' => 'collection']))->out(false),
     ];
 }
-echo html_writer::table($table);
-
+$buttons = [];
+$flows = [];
 if (!empty($instance->coassemblecourseid)) {
-    echo html_writer::start_div('coassemble-manage-actions');
-    $actions = ['duplicate', 'unlink', 'refresh'];
+    $actions = ['duplicate', 'unlink', 'refresh', 'scorm'];
     if (in_array($instance->linkmode, ['created', 'copied'], true) && !$otheruses) {
         $actions[] = 'delete';
     }
     foreach ($actions as $act) {
-        $url = new moodle_url('/mod/coassemble/manage.php', [
-            'id' => $cm->id,
-            'action' => $act,
-            'remoteid' => (int) $instance->coassemblecourseid,
-            'sesskey' => sesskey(),
-        ]);
-        echo $OUTPUT->single_button($url, get_string('manage_' . $act, 'mod_coassemble'), 'post');
+        $buttons[] = [
+            'url' => (new moodle_url('/mod/coassemble/manage.php'))->out(false),
+            'label' => get_string('manage_' . $act, 'mod_coassemble'),
+            'fields' => [
+                ['name' => 'id', 'value' => $cm->id], ['name' => 'action', 'value' => $act],
+                ['name' => 'remoteid', 'value' => (int) $instance->coassemblecourseid], ['name' => 'sesskey', 'value' => sesskey()],
+            ],
+        ];
     }
-    $scormurl = new moodle_url('/mod/coassemble/manage.php', [
-        'id' => $cm->id,
-        'action' => 'scorm',
-        'remoteid' => (int) $instance->coassemblecourseid,
-        'sesskey' => sesskey(),
-    ]);
-    echo $OUTPUT->single_button($scormurl, get_string('manage_scorm', 'mod_coassemble'), 'post');
-    $refreshprogress = new moodle_url('/mod/coassemble/refresh_progress.php', [
-        'id' => $cm->id,
-        'sesskey' => sesskey(),
-    ]);
-    echo $OUTPUT->single_button($refreshprogress, get_string('refresh_progress', 'mod_coassemble'), 'post');
-    echo html_writer::end_div();
+    $buttons[] = [
+        'url' => (new moodle_url('/mod/coassemble/refresh_progress.php'))->out(false),
+        'label' => get_string('refresh_progress', 'mod_coassemble'),
+        'fields' => [['name' => 'id', 'value' => $cm->id], ['name' => 'sesskey', 'value' => sesskey()]],
+    ];
 } else {
-    echo html_writer::div(
-        $OUTPUT->notification(get_string('error_nocourseyet', 'mod_coassemble'), 'info'),
-        'coassemble-manage-notice'
-    );
-    echo html_writer::start_div('coassemble-manage-actions');
-    $createflows = \mod_coassemble\local\builder_options::creation_flows();
-    foreach ($createflows as $fkey => $flabel) {
-        echo $OUTPUT->single_button(
-            new moodle_url('/mod/coassemble/view.php', [
-                'id' => $cm->id,
-                'mode' => 'edit',
-                'flow' => $fkey,
-            ]),
-            $flabel,
-            $fkey === 'existing' ? 'get' : 'post'
-        );
+    echo $OUTPUT->notification(get_string('error_nocourseyet', 'mod_coassemble'), 'info');
+    foreach (\mod_coassemble\local\builder_options::creation_flows() as $fkey => $flabel) {
+        $flows[] = [
+            'url' => (new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id, 'mode' => 'edit', 'flow' => $fkey]))->out(false),
+            'label' => $flabel, 'post' => $fkey !== 'existing',
+            'fields' => [['name' => 'sesskey', 'value' => sesskey()]],
+        ];
     }
-    echo html_writer::end_div();
 }
-
-echo html_writer::div(
-    html_writer::link(
-        new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id]),
-        get_string('backtoactivity', 'mod_coassemble'),
-        ['class' => 'btn btn-link']
-    ),
-    'mt-3'
-);
+echo $OUTPUT->render_from_template('mod_coassemble/manage', ['rows' => $rows, 'actions' => $buttons, 'flows' => $flows]);
+echo $OUTPUT->render_from_template('mod_coassemble/back_link', [
+    'url' => (new moodle_url('/mod/coassemble/view.php', ['id' => $cm->id]))->out(false),
+    'label' => get_string('backtoactivity', 'mod_coassemble'),
+]);
 
 echo $OUTPUT->footer();

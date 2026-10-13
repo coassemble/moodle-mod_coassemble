@@ -8,7 +8,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:${{ matrix.moodle-branch == 'main' && '17' || '16' }}
+        image: postgres:${{ matrix.moodle-branch == 'MOODLE_503_STABLE' && '17' || '16' }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: trust
@@ -66,9 +66,8 @@ jobs:
           - php: '8.3'
             moodle-branch: 'MOODLE_502_STABLE'
             database: 'mariadb'
-          # Forward compatibility only: 5.3 is not yet a stable release.
           - php: '8.4'
-            moodle-branch: 'main'
+            moodle-branch: 'MOODLE_503_STABLE'
             database: 'pgsql'
 
     steps:
@@ -131,7 +130,7 @@ jobs:
       # Build artifacts are committed from the newest supported branch's
       # toolchain; older branches minify differently, so only check there.
       - name: Grunt (AMD build freshness)
-        if: ${{ !cancelled() && matrix.moodle-branch == 'MOODLE_501_STABLE' }}
+        if: ${{ !cancelled() && matrix.moodle-branch == 'MOODLE_503_STABLE' }}
         run: moodle-plugin-ci grunt --max-lint-warnings 0
 
       - name: PHPUnit tests

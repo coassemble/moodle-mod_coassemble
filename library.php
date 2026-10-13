@@ -81,7 +81,10 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('library', 'mod_coassemble'));
 $backurl = $instance ? new moodle_url('/mod/coassemble/view.php', ['id' => $id])
     : new moodle_url('/course/view.php', ['id' => $course->id]);
-echo html_writer::link($backurl, get_string($instance ? 'backtoactivity' : 'backtocourse', 'mod_coassemble'));
+echo $OUTPUT->render_from_template('mod_coassemble/back_link', [
+    'url' => $backurl->out(false),
+    'label' => get_string($instance ? 'backtoactivity' : 'backtocourse', 'mod_coassemble'),
+]);
 if ($error !== '') {
     echo $OUTPUT->notification($error, 'error');
 }
@@ -91,7 +94,9 @@ if (!$client->is_configured()) {
     exit;
 }
 $canselect = $instance && empty($instance->coassemblecourseid);
-echo html_writer::tag('p', get_string($canselect ? 'library_select_intro' : 'library_browse_intro', 'mod_coassemble'));
+echo $OUTPUT->render_from_template('mod_coassemble/library_intro', [
+    'intro' => get_string($canselect ? 'library_select_intro' : 'library_browse_intro', 'mod_coassemble'),
+]);
 
 if ($remoteid && $canselect) {
     try {
@@ -100,29 +105,21 @@ if ($remoteid && $canselect) {
         if ($reason !== '') {
             echo $OUTPUT->notification(get_string($reason, 'mod_coassemble'), 'warning');
         } else {
-            echo $OUTPUT->heading(s($remote['title'] ?? get_string('library_untitled', 'mod_coassemble')), 3);
-            echo html_writer::start_div('coassemble-library-choice');
-            echo html_writer::tag('p', get_string('library_link_help', 'mod_coassemble'));
-            echo $OUTPUT->single_button(new moodle_url('/mod/coassemble/library.php', $params + [
-                'remoteid' => $remoteid, 'action' => 'link',
-            ]), get_string('library_link', 'mod_coassemble'), 'post');
-            echo html_writer::end_div();
-            echo html_writer::start_div('coassemble-library-choice');
-            echo html_writer::tag('p', get_string('library_copy_help', 'mod_coassemble'));
-            echo $OUTPUT->single_button(new moodle_url('/mod/coassemble/library.php', $params + [
-                'remoteid' => $remoteid, 'action' => 'copy',
-            ]), get_string('library_copy', 'mod_coassemble'), 'post');
-            echo html_writer::end_div();
+            echo $OUTPUT->render_from_template('mod_coassemble/library_choice', [
+                'title' => $remote['title'] ?? get_string('library_untitled', 'mod_coassemble'),
+                'url' => (new moodle_url('/mod/coassemble/library.php'))->out(false),
+                'id' => $id,
+                'remoteid' => $remoteid,
+                'sesskey' => sesskey(),
+            ]);
         }
     } catch (Throwable $e) {
         \mod_coassemble\local\diagnostics::log($e, 'library_course');
         echo $OUTPUT->notification(get_string('error_apirequest', 'mod_coassemble'), 'error');
     }
-    echo html_writer::tag(
-        'p',
-        html_writer::link($PAGE->url, get_string('library_back', 'mod_coassemble')),
-        ['class' => 'coassemble-library-back']
-    );
+    echo $OUTPUT->render_from_template('mod_coassemble/back_link', [
+        'url' => $PAGE->url->out(false), 'label' => get_string('library_back', 'mod_coassemble'),
+    ]);
     echo $OUTPUT->footer();
     exit;
 }
@@ -139,45 +136,33 @@ try {
     echo $OUTPUT->footer();
     exit;
 }
-$table = new html_table();
-$table->head = [get_string('library_thumbnail', 'mod_coassemble'), get_string('name'),
-    get_string('library_screens', 'mod_coassemble'), get_string('library_status', 'mod_coassemble'),
-    get_string('lastmodified'), get_string('actions')];
-$table->data = [];
+$rows = [];
 foreach ($courses as $remote) {
     $reason = course_library::unavailable_reason($remote);
-    $thumbnail = clean_param($remote['thumbnail'] ?? '', PARAM_URL);
-    $image = $thumbnail ? html_writer::empty_tag('img', [
-        'src' => $thumbnail, 'alt' => '', 'width' => 96, 'height' => 54, 'loading' => 'lazy',
-        'class' => 'coassemble-library-thumbnail',
-    ]) : '';
     $updated = strtotime($remote['updated'] ?? '') ?: 0;
     $screens = array_filter($remote['screens'] ?? [], static function ($screen) {
         return empty($screen['deleted']);
     });
-    $selection = '';
+    $row = [
+        'title' => $remote['title'] ?? get_string('library_untitled', 'mod_coassemble'),
+        'thumbnail' => clean_param($remote['thumbnail'] ?? '', PARAM_URL),
+        'screens' => count($screens),
+        'status' => get_string(!empty($remote['published']) ? 'library_published' : 'library_draft', 'mod_coassemble'),
+        'updated' => $updated ? userdate($updated) : get_string('unknown'),
+    ];
     if ($reason) {
-        $selection = html_writer::span(
-            get_string($reason . '_badge', 'mod_coassemble'),
-            'badge coassemble-library-badge'
-        ) . ' ' . get_string($reason, 'mod_coassemble');
-    }
-    if (!$reason && $canselect) {
-        $selection = html_writer::link(new moodle_url('/mod/coassemble/library.php', $params + [
+        $row['reason'] = get_string($reason, 'mod_coassemble');
+        $row['badge'] = get_string($reason . '_badge', 'mod_coassemble');
+    } else if ($canselect) {
+        $row['chooseurl'] = (new moodle_url('/mod/coassemble/library.php', $params + [
             'remoteid' => (int) $remote['id'], 'title' => $title, 'page' => $page,
-        ]), get_string('choose'), ['class' => 'btn btn-secondary',
-            'aria-label' => get_string('library_choose', 'mod_coassemble', $remote['title'] ?? '')]);
+        ]))->out(false);
+        $row['chooselabel'] = get_string('library_choose', 'mod_coassemble', $remote['title'] ?? '');
     }
-    $row = new html_table_row([$image, s($remote['title'] ?? get_string('library_untitled', 'mod_coassemble')),
-        count($screens), get_string(!empty($remote['published']) ? 'library_published' : 'library_draft', 'mod_coassemble'),
-        $updated ? userdate($updated) : get_string('unknown'), $selection]);
-    if ($reason) {
-        $row->attributes['class'] = 'coassemble-library-unavailable';
-    }
-    $table->data[] = $row;
+    $rows[] = $row;
 }
-if ($courses) {
-    echo html_writer::table($table);
+if ($rows) {
+    echo $OUTPUT->render_from_template('mod_coassemble/library_courses', ['courses' => $rows]);
 } else {
     echo $OUTPUT->notification(get_string('library_empty', 'mod_coassemble'), 'info');
 }

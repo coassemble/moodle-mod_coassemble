@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.4.1 — 2026-10-14
+
+### Security
+- Remove the standalone collection endpoint that accepted arbitrary workspace collection IDs.
+  Configured collections continue through the activity-bound view route.
+- Apply activity group mode, grouping and access-all-groups permissions to learner progress reports.
+  Teachers without any allowed separate group see no results.
+
+### Fixed
+- Save and display launches the saved scratch or AI creation flow through a one-use,
+  CSRF-protected POST. Ordinary unlinked activity visits still offer creation choices.
+- Retain Moodle's standard course navigation and activity header in player, builder and collection views.
+- Clean remote course titles and limit them to the name field's 255 characters before persistence.
+- Load embed session messages through core/str and remove hardcoded English fallbacks.
+- Use cmactions::duplicate/delete on Moodle 5.2+ in restore regression tests.
+
+### Changed
+- Move library choices, course tables, management panels and back links into Mustache templates.
+- Define the Headless API prefix once and remove the unused resolve_course language string.
+- Add public bug report and feature request forms.
+- Declare Moodle 5.3 support and test its stable branch with PostgreSQL 17 in CI.
+
+
 ## 1.4.0 (unreleased)
 
 - Remove external analytics embeds and their capability and navigation links.

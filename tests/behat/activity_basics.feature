@@ -99,3 +99,17 @@ Feature: Coassemble activity basics
     When I navigate to "Progress report" in current page administration
     Then I should see "No learner progress has been recorded yet."
     And I should not see "Analytics"
+
+  Scenario: Save and display launches the saved flow without a second choice
+    Given the following config values are set as admin:
+      | config | value               | plugin         |
+      | apiurl | https://example.com | mod_coassemble |
+      | apikey | unused-test-key     | mod_coassemble |
+    And I am on the "Test Coassemble" "coassemble activity editing" page logged in as teacher1
+    When I set the field "Initial create flow" to "Generate with AI"
+    And I press "Save and display"
+    Then "#coassemble-launch-form" "css_element" should exist
+    And "#coassemble-launch-form input[name=flow][value=ai]" "css_element" should exist
+    And "Continue" "button" should exist
+    And "Generate with AI" "button" should not exist
+    And "Start from scratch" "button" should not exist

@@ -10,7 +10,7 @@ The Coassemble plug-in requires a commercial subscription to Coassemble, with av
 The plugin is free to install; a Coassemble subscription is not included.
 API access and authoring entitlement are required.
 
-Requires Moodle 4.1–5.2 and a PHP version supported by your Moodle release.
+Requires Moodle 4.1–5.3 and a PHP version supported by your Moodle release.
 Use a maintained Moodle release for new installations. Configure your workspace
 credentials under Site administration → Plugins → Activity modules → Coassemble,
 then run the connection test. HTTPS is required for webhook registration.

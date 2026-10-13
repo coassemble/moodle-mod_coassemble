@@ -94,6 +94,14 @@ configured API host and workspace credentials. Missing or failed requests show
 4. HTTP status and operation from the Moodle event log (do not include raw payloads, keys or signed URLs)
 5. Whether postMessage events fire in the browser
 
+## Public bug reports and feature requests
+
+Use the [public GitHub issue tracker](https://github.com/coassemble/moodle-mod_coassemble/issues)
+for reproducible plugin bugs and feature requests. The issue forms request
+version details, reproduction steps and expected/actual behaviour. Search existing
+issues first and keep API keys, signed embed URLs and learner data out of reports.
+For account-specific problems, use the private support channels below.
+
 ## Contact support
 
 For help or to report a bug, email [gday@coassemble.com](mailto:gday@coassemble.com),

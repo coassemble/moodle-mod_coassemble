@@ -159,20 +159,42 @@ final class course_link_test extends \advanced_testcase {
             'course' => $course->id, 'coassemblecourseid' => 123, 'linkmode' => $mode,
         ]);
         $cm = get_coursemodule_from_instance('coassemble', $instance->id);
-        $restoredcm = duplicate_module($course, $cm);
+        if (method_exists(\core_courseformat\local\cmactions::class, 'duplicate')) {
+            $restoredcm = (new \core_courseformat\local\cmactions($course))->duplicate((int) $cm->id);
+        } else {
+            $restoredcm = duplicate_module($course, $cm);
+        }
         $restored = $DB->get_record('coassemble', ['id' => $restoredcm->instance], '*', MUST_EXIST);
         $this->assertSame('linked', $restored->linkmode);
         $this->assertEquals(123, $restored->coassemblecourseid);
         $this->assertSame($mode, $DB->get_field('coassemble', 'linkmode', ['id' => $instance->id]));
 
         // Model a destination site with no record of the original activity.
-        course_delete_module($cm->id);
+        if (method_exists(\core_courseformat\local\cmactions::class, 'delete')) {
+            (new \core_courseformat\local\cmactions($course))->delete((int) $cm->id);
+        } else {
+            course_delete_module($cm->id);
+        }
         $this->assertSame(0, course_link::other_uses($restored));
         $client = $this->createMock(\mod_coassemble\api\client::class);
         $client->expects($this->never())->method('delete_course');
         $this->expectException(\moodle_exception::class);
         $this->expectExceptionMessage(get_string('manage_delete_linked', 'mod_coassemble'));
         course_link::delete_remote($restored, $client);
+    }
+
+    /**
+     * Remote titles fit Moodle's name field and do not retain HTML.
+     */
+    public function test_remote_title_is_cleaned_and_bounded(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $instance = $this->getDataGenerator()->create_module('coassemble', ['course' => $course->id]);
+        $title = '<b>' . str_repeat('界', 300) . '</b>';
+        $instance = course_link::persist($instance, 123, $title, 'linked');
+        $this->assertSame(str_repeat('界', 255), $DB->get_field('coassemble', 'name', ['id' => $instance->id]));
+        $this->assertSame('linked', $instance->linkmode);
     }
 
     /**

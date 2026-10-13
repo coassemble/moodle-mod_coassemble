@@ -25,6 +25,7 @@ require_once($CFG->libdir . '/gradelib.php');
 #[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_record_progress')]
 #[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_update_grades')]
 #[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_reset_userdata')]
+#[\PHPUnit\Framework\Attributes\CoversFunction('coassemble_coursemodule_edit_post_actions')]
 /**
  * Tests for progress recording, grading and course reset.
  *
@@ -34,8 +35,34 @@ require_once($CFG->libdir . '/gradelib.php');
  * @covers ::coassemble_record_progress
  * @covers ::coassemble_update_grades
  * @covers ::coassemble_reset_userdata
+ * @covers ::coassemble_coursemodule_edit_post_actions
  */
 final class lib_test extends \advanced_testcase {
+    /**
+     * Only Save and display from the activity form arms automatic creation.
+     */
+    public function test_saved_creation_flow_launch_is_limited_to_explicit_display(): void {
+        global $SESSION;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $instance = $this->getDataGenerator()->create_module('coassemble', ['course' => $course->id, 'flow' => 'ai']);
+        $info = (object) [
+            'modulename' => 'coassemble', 'instance' => $instance->id, 'coursemodule' => $instance->cmid,
+        ];
+        coassemble_coursemodule_edit_post_actions($info, $course);
+        $this->assertFalse(isset($SESSION->coassemblelaunch[$instance->cmid]));
+        $info->frontend = true;
+        coassemble_coursemodule_edit_post_actions($info, $course);
+        $this->assertFalse(isset($SESSION->coassemblelaunch[$instance->cmid]));
+        $info->submitbutton = 'Save and display';
+        coassemble_coursemodule_edit_post_actions($info, $course);
+        $this->assertTrue($SESSION->coassemblelaunch[$instance->cmid]);
+        unset($SESSION->coassemblelaunch[$instance->cmid]);
+        $instance = \mod_coassemble\local\course_link::persist($instance, 123);
+        coassemble_coursemodule_edit_post_actions($info, $course);
+        $this->assertFalse(isset($SESSION->coassemblelaunch[$instance->cmid]));
+    }
+
     /**
      * Create course, activity and enrolled user.
      *

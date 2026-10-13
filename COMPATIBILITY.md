@@ -1,8 +1,8 @@
 # Compatibility matrix — mod_coassemble
 
-Declared support: `$plugin->supported = [401, 502]` — **Moodle 4.1 to 5.2**.
+Declared support: `$plugin->supported = [401, 503]` — **Moodle 4.1 to 5.3**.
 Minimum: `$plugin->requires = 2022112800` (Moodle 4.1).
-Plugin release **1.4.0**, version `2026092205` (unreleased).
+Plugin release **1.4.1**, version `2026101400` (unreleased).
 
 | Moodle | PHP in CI | Coverage |
 |--------|-----------|----------|
@@ -12,18 +12,18 @@ Plugin release **1.4.0**, version `2026092205` (unreleased).
 | 5.0 | 8.2 | PostgreSQL |
 | 5.1 | 8.3 | PostgreSQL and MariaDB |
 | 5.2 | 8.3 | PostgreSQL and MariaDB |
-| 5.3 development (`main`) | 8.4 | Forward compatibility, PostgreSQL; not declared stable support |
+| 5.3 (LTS) | 8.4 | PostgreSQL 17 |
 
 The workflow defines the CI targets above. Check its results for the revision
 you plan to deploy. Moodle 4.2 and 4.3 remain within the legacy range but have
 no dedicated CI jobs.
 
-As of 21 September 2026, maintained Moodle releases are 4.5, 5.0, 5.1 and 5.2;
-5.3 is scheduled for 5 October 2026. See the official
-[release schedule](https://moodledev.io/general/releases).
+Moodle 5.3 was released on 5 October 2026 and is included in the supported range.
+See the official [release schedule](https://moodledev.io/general/releases).
 Older branches are retained for existing installations; new sites should use a
-maintained Moodle release and its supported PHP version. CI uses PostgreSQL 16 for stable branches, PostgreSQL 17 for the development
-branch, and MariaDB 10.11. Bootstrap spacing uses plugin-scoped logical CSS properties,
+maintained Moodle release and its supported PHP version. CI uses PostgreSQL 16
+for Moodle 4.1–5.2, PostgreSQL 17 for Moodle 5.3, and MariaDB 10.11. Bootstrap
+spacing uses plugin-scoped logical CSS properties,
 so it works on both Bootstrap 4 and Bootstrap 5 without deprecated utilities.
 
 ## Coassemble API

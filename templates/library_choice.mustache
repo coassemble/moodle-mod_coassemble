@@ -1,0 +1,52 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_coassemble/library_choice
+
+    Confirm linking or copying a selected workspace course.
+
+    Context variables required for this template:
+    * title - Remote course title
+    * url - Library URL
+    * id - Course module id
+    * remoteid - Remote course id
+    * sesskey - CSRF token
+
+    Example context (json):
+    {"title":"Safety","url":"#","id":2,"remoteid":42,"sesskey":"example"}
+}}
+<h3>{{title}}</h3>
+<div class="coassemble-library-choice">
+    <p>{{#str}}library_link_help, mod_coassemble{{/str}}</p>
+    <form method="post" action="{{url}}">
+        <input type="hidden" name="id" value="{{id}}">
+        <input type="hidden" name="remoteid" value="{{remoteid}}">
+        <input type="hidden" name="action" value="link">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <button type="submit" class="btn btn-secondary">{{#str}}library_link, mod_coassemble{{/str}}</button>
+    </form>
+</div>
+<div class="coassemble-library-choice">
+    <p>{{#str}}library_copy_help, mod_coassemble{{/str}}</p>
+    <form method="post" action="{{url}}">
+        <input type="hidden" name="id" value="{{id}}">
+        <input type="hidden" name="remoteid" value="{{remoteid}}">
+        <input type="hidden" name="action" value="copy">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <button type="submit" class="btn btn-secondary">{{#str}}library_copy, mod_coassemble{{/str}}</button>
+    </form>
+</div>

@@ -51,7 +51,7 @@ if ($resolve) {
 
 if ($mode === '') {
     if ($canauthor && !$hascourse && !$hascollection) {
-        $mode = 'choose';
+        $mode = !empty($SESSION->coassemblelaunch[$cm->id]) ? 'launch' : 'choose';
     } else if ($canauthor && optional_param('edit', 0, PARAM_BOOL)) {
         $mode = 'edit';
     } else if ($hascollection && !$hascourse) {
@@ -111,6 +111,25 @@ if (!$client->is_configured()) {
             'get'
         );
     }
+    echo $OUTPUT->footer();
+    exit;
+}
+
+if ($mode === 'launch') {
+    if (empty($SESSION->coassemblelaunch[$cm->id]) || $hascourse || $hascollection) {
+        throw new invalid_parameter_exception('No saved creation flow to launch');
+    }
+    require_capability('mod/coassemble:author', $context);
+    \mod_coassemble\local\builder_options::require_creation_flow((string) $instance->flow);
+    unset($SESSION->coassemblelaunch[$cm->id]);
+    $PAGE->requires->js_call_amd('mod_coassemble/launch', 'init');
+    echo $OUTPUT->header();
+    echo $OUTPUT->render_from_template('mod_coassemble/launch', [
+        'url' => (new moodle_url('/mod/coassemble/view.php'))->out(false),
+        'cmid' => (int) $cm->id,
+        'flow' => (string) $instance->flow,
+        'sesskey' => sesskey(),
+    ]);
     echo $OUTPUT->footer();
     exit;
 }
@@ -179,13 +198,7 @@ if ($mode === 'collection') {
         'cmid' => (int) $cm->id,
         'backUrl' => $exiturl->out(false),
         'statusElId' => 'coassemble-session-status',
-        'strings' => [
-            'error' => get_string('session_error', 'mod_coassemble'),
-            'expired' => get_string('session_expired', 'mod_coassemble'),
-        ],
     ]]);
-    $PAGE->set_pagelayout('embedded');
-    $PAGE->activityheader->disable();
     echo $OUTPUT->header();
     echo html_writer::start_div('coassemble-player-layout');
     echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
@@ -259,14 +272,8 @@ if ($mode === 'edit') {
         'resolveFormId' => !$hascourse ? 'coassemble-resolve-form' : '',
         'persistCourse' => true,
         'statusElId' => 'coassemble-session-status',
-        'strings' => [
-            'error' => get_string('session_error', 'mod_coassemble'),
-            'expired' => get_string('session_expired', 'mod_coassemble'),
-        ],
     ]]);
 
-    $PAGE->set_pagelayout('embedded');
-    $PAGE->activityheader->disable();
     echo $OUTPUT->header();
     echo html_writer::start_div('coassemble-player-layout');
     echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
@@ -280,31 +287,6 @@ if ($mode === 'edit') {
             'exit' => true,
         ]],
     ]);
-
-    $createflows = \mod_coassemble\local\builder_options::creation_flows();
-    if (empty($instance->coassemblecourseid)) {
-        $flowlinks = [];
-        foreach ($createflows as $fkey => $flabel) {
-            $furl = new moodle_url('/mod/coassemble/view.php', [
-                'id' => $cm->id,
-                'mode' => 'edit',
-                'flow' => $fkey,
-            ]);
-            $flowlinks[] = [
-                'url' => $furl->out(false),
-                'label' => $flabel,
-                'primary' => $selectedflow === $fkey,
-                'current' => $selectedflow === $fkey,
-                'post' => $fkey !== 'existing',
-                'sesskey' => sesskey(),
-            ];
-        }
-        echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
-            'label' => get_string('flow', 'mod_coassemble'),
-            'class' => 'coassemble-flow-bar',
-            'links' => $flowlinks,
-        ]);
-    }
 
     echo $OUTPUT->render_from_template('mod_coassemble/embed', [
         'url' => $embed['url'],
@@ -381,10 +363,6 @@ $jsconfig = [
     'mode' => $canauthor ? 'edit' : 'view',
     'cmid' => (int) $cm->id,
     'statusElId' => 'coassemble-session-status',
-    'strings' => [
-        'error' => get_string('session_error', 'mod_coassemble'),
-        'expired' => get_string('session_expired', 'mod_coassemble'),
-    ],
 ];
 if ($canauthor) {
     $jsconfig['persistCourse'] = true;
@@ -393,12 +371,10 @@ if ($canauthor) {
 }
 $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [$jsconfig]);
 
-$PAGE->set_pagelayout('embedded');
-$PAGE->activityheader->disable();
 echo $OUTPUT->header();
 echo html_writer::start_div('coassemble-player-layout');
 
-// Keep the course context and return path alongside the full-bleed player.
+// Keep the content actions alongside Moodle navigation.
 $chromelinks = [['url' => $exiturl->out(false), 'label' => $exitlabel, 'exit' => true]];
 if ($canauthor) {
     $remote = null;

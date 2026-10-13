@@ -36,6 +36,9 @@ function coassemble_supports($feature) {
             return true;
         case FEATURE_COMPLETION_HAS_RULES:
             return true;
+        case FEATURE_GROUPS:
+        case FEATURE_GROUPINGS:
+            return true;
         case FEATURE_GRADE_HAS_GRADE:
             return true;
         case FEATURE_SHOW_DESCRIPTION:
@@ -114,6 +117,26 @@ function coassemble_update_instance(stdClass $data, $mform = null) {
     $result = $DB->update_record('coassemble', $data);
     coassemble_grade_item_update($data);
     return $result;
+}
+
+/**
+ * Launch the saved creation flow after an author selects Save and display.
+ *
+ * @param stdClass $moduleinfo Saved module information
+ * @param stdClass $course Moodle course
+ * @return stdClass
+ */
+function coassemble_coursemodule_edit_post_actions(stdClass $moduleinfo, stdClass $course): stdClass {
+    global $DB, $SESSION;
+
+    if ($moduleinfo->modulename !== 'coassemble' || empty($moduleinfo->frontend) || !isset($moduleinfo->submitbutton)) {
+        return $moduleinfo;
+    }
+    $instance = $DB->get_record('coassemble', ['id' => $moduleinfo->instance], '*', MUST_EXIST);
+    if (empty($instance->coassemblecourseid) && empty($instance->collectionid) && $instance->flow !== 'existing') {
+        $SESSION->coassemblelaunch[$moduleinfo->coursemodule] = true;
+    }
+    return $moduleinfo;
 }
 
 /**

@@ -22,6 +22,10 @@ moodle/
       ...
 ```
 
+For a manual upgrade, replace the existing `mod/coassemble` directory with the
+new package before running the upgrade. Do not copy the new files over the old
+ones: obsolete entry points such as `collection.php` must be removed.
+
 ## Site setup
 
 1. **Site administration → Notifications** — install / upgrade the plugin.
@@ -38,9 +42,9 @@ moodle/
 ## First activity
 
 1. As editing teacher, add **Coassemble** to a course.
-2. Save the activity, then choose to create content or use an existing course.
-3. Start from scratch, generate with AI, or select a workspace course and choose
-   whether to link the original or make a copy. New courses use Builder 2.
+2. Select the initial create flow and choose **Save and display**.
+3. The saved scratch or AI flow opens directly in Builder 2. The existing-course
+   flow opens the library, where you can link the original or make a copy.
 4. Confirm **Manage content** shows a Coassemble course ID and publish status.
 5. Publish, then open as a student and complete the course.
 6. Confirm gradebook + completion; optionally disconnect network mid-completion and rely on webhook.
