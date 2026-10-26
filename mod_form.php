@@ -116,6 +116,13 @@ class mod_coassemble_mod_form extends moodleform_mod {
      */
     public function data_preprocessing(&$defaultvalues) {
         parent::data_preprocessing($defaultvalues);
+        if (
+            empty($this->_instance)
+            && $this->_course->format === 'singleactivity'
+            && (!isset($defaultvalues['name']) || $defaultvalues['name'] === '')
+        ) {
+            $defaultvalues['name'] = core_text::substr(clean_param($this->_course->fullname, PARAM_TEXT), 0, 255);
+        }
         if (empty($defaultvalues['flow'])) {
             $defaultvalues['flow'] = '';
         }

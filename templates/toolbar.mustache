@@ -25,6 +25,7 @@
     * post, sesskey - Optional POST form fields on a link
     * class - Optional toolbar class
     * coursename, activityname - Optional Moodle-formatted context labels
+    * previewlabel, previewdescription - Optional teacher preview label and explanation
 
     Example context (json):
     {
@@ -39,6 +40,9 @@
         <span class="coassemble-course-name">{{{coursename}}}</span>
         <span aria-hidden="true"> / </span>
         <span class="coassemble-activity-name">{{{activityname}}}</span>
+        {{#previewlabel}}
+        <div><strong>{{previewlabel}}</strong> &mdash; {{previewdescription}}</div>
+        {{/previewlabel}}
     </div>
     {{/coursename}}
     {{#links}}

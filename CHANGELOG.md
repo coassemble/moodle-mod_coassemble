@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- Use Moodle's activity navigation for editing, content management and progress
+  reports, removing duplicate toolbar buttons while keeping the return link.
+- Use the course name as the editable default when adding a Coassemble activity
+  to a single-activity course, preserving existing and explicitly entered names.
+- Label the teacher preview and its return link clearly, and explain that preview
+  progress is not recorded.
+
 ## 1.4.1 — 2026-10-14
 
 ### Security

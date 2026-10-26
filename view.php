@@ -283,7 +283,7 @@ if ($mode === 'edit') {
         'activityname' => format_string($instance->name),
         'links' => [[
             'url' => $hascourse ? $backurl->out(false) : $exiturl->out(false),
-            'label' => $hascourse ? get_string('backtoactivity', 'mod_coassemble') : $exitlabel,
+            'label' => $hascourse ? get_string('backtopreview', 'mod_coassemble') : $exitlabel,
             'exit' => true,
         ]],
     ]);
@@ -374,8 +374,6 @@ $PAGE->requires->js_call_amd('mod_coassemble/embed', 'init', [$jsconfig]);
 echo $OUTPUT->header();
 echo html_writer::start_div('coassemble-player-layout');
 
-// Keep the content actions alongside Moodle navigation.
-$chromelinks = [['url' => $exiturl->out(false), 'label' => $exitlabel, 'exit' => true]];
 if ($canauthor) {
     $remote = null;
     try {
@@ -386,32 +384,21 @@ if ($canauthor) {
         $remote = null;
     }
 }
-$actions = [
-    ['view.php', 'nav_editcontent', ['mode' => 'edit'], 'mod/coassemble:author'],
-    ['manage.php', 'nav_manage', [], 'mod/coassemble:manage'],
-    ['report.php', 'nav_report', [], 'mod/coassemble:manage'],
-];
-foreach ($actions as [$page, $label, $params, $capability]) {
-    if (has_capability($capability, $context)) {
-        $chromelinks[] = [
-            'url' => (new moodle_url('/mod/coassemble/' . $page, ['id' => $cm->id] + $params))->out(false),
-            'label' => get_string($label, 'mod_coassemble'),
-        ];
-    }
-}
 echo $OUTPUT->render_from_template('mod_coassemble/toolbar', [
-    'label' => get_string('modulename', 'mod_coassemble'),
+    'label' => get_string($canauthor ? 'teacherpreview' : 'modulename', 'mod_coassemble'),
     'class' => 'coassemble-player-chrome',
     'coursename' => format_string($course->fullname),
     'activityname' => format_string($instance->name),
-    'links' => $chromelinks,
+    'previewlabel' => $canauthor ? get_string('teacherpreview', 'mod_coassemble') : '',
+    'previewdescription' => $canauthor ? get_string('teacherpreview_description', 'mod_coassemble') : '',
+    'links' => [['url' => $exiturl->out(false), 'label' => $exitlabel, 'exit' => true]],
 ]);
 if ($canauthor && !empty($remote) && empty($remote['published'])) {
     echo $OUTPUT->notification(get_string('status_unpublished', 'mod_coassemble'), 'warning');
 }
 echo $OUTPUT->render_from_template('mod_coassemble/embed', [
     'url' => $embed['url'],
-    'title' => get_string('player_iframe_title', 'mod_coassemble'),
+    'title' => get_string($canauthor ? 'teacherpreview_iframe_title' : 'player_iframe_title', 'mod_coassemble'),
     'allow' => 'clipboard-write; fullscreen; microphone; camera',
     'shellclass' => 'coassemble-embed-shell--view',
 ]);
