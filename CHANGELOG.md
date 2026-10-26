@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.2 — 2026-10-27
 
 ### Changed
 - Use Moodle's activity navigation for editing, content management and progress
@@ -9,6 +9,10 @@
   to a single-activity course, preserving existing and explicitly entered names.
 - Label the teacher preview and its return link clearly, and explain that preview
   progress is not recorded.
+
+### Fixed
+- Launch the saved creation flow after Save and display on Moodle 4.1, which
+  does not supply the frontend flag used by newer Moodle versions.
 
 ## 1.4.1 — 2026-10-14
 

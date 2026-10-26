@@ -2,7 +2,7 @@
 
 Declared support: `$plugin->supported = [401, 503]` — **Moodle 4.1 to 5.3**.
 Minimum: `$plugin->requires = 2022112800` (Moodle 4.1).
-Plugin release **1.4.1**, version `2026101400` (unreleased).
+Plugin release **1.4.2**, version `2026102700`.
 
 | Moodle | PHP in CI | Coverage |
 |--------|-----------|----------|

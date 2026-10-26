@@ -129,7 +129,12 @@ function coassemble_update_instance(stdClass $data, $mform = null) {
 function coassemble_coursemodule_edit_post_actions(stdClass $moduleinfo, stdClass $course): stdClass {
     global $DB, $SESSION;
 
-    if ($moduleinfo->modulename !== 'coassemble' || empty($moduleinfo->frontend) || !isset($moduleinfo->submitbutton)) {
+    // Moodle 4.1 does not set frontend, so only an explicit false value rules out a form submission.
+    if (
+        $moduleinfo->modulename !== 'coassemble'
+        || (isset($moduleinfo->frontend) && !$moduleinfo->frontend)
+        || !isset($moduleinfo->submitbutton)
+    ) {
         return $moduleinfo;
     }
     $instance = $DB->get_record('coassemble', ['id' => $moduleinfo->instance], '*', MUST_EXIST);

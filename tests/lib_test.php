@@ -58,6 +58,16 @@ final class lib_test extends \advanced_testcase {
         coassemble_coursemodule_edit_post_actions($info, $course);
         $this->assertTrue($SESSION->coassemblelaunch[$instance->cmid]);
         unset($SESSION->coassemblelaunch[$instance->cmid]);
+
+        $info->frontend = false;
+        coassemble_coursemodule_edit_post_actions($info, $course);
+        $this->assertFalse(isset($SESSION->coassemblelaunch[$instance->cmid]));
+
+        unset($info->frontend);
+        coassemble_coursemodule_edit_post_actions($info, $course);
+        $this->assertTrue($SESSION->coassemblelaunch[$instance->cmid]);
+        unset($SESSION->coassemblelaunch[$instance->cmid]);
+
         $instance = \mod_coassemble\local\course_link::persist($instance, 123);
         coassemble_coursemodule_edit_post_actions($info, $course);
         $this->assertFalse(isset($SESSION->coassemblelaunch[$instance->cmid]));

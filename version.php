@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_coassemble';
-$plugin->version = 2026101400;
+$plugin->version = 2026102700;
 $plugin->requires = 2022112800; // Moodle 4.1.
 $plugin->supported = [401, 503]; // Moodle 4.1 to 5.3.
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.4.1';
+$plugin->release = '1.4.2';
