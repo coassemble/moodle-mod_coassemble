@@ -42,11 +42,12 @@ $error = optional_param('error', '', PARAM_ALPHANUMEXT);
 $pending = connect::consume_state($state);
 $settingsurl = connect::settings_url();
 
-if ($error === 'access_denied') {
-    redirect($settingsurl, get_string('connect_cancelled', 'mod_coassemble'), null, \core\output\notification::NOTIFY_INFO);
-}
+// State first, so a forged cancellation can't end a genuine attempt.
 if ($pending === null) {
     redirect($settingsurl, get_string('connect_error_state', 'mod_coassemble'), null, \core\output\notification::NOTIFY_ERROR);
+}
+if ($error === 'access_denied') {
+    redirect($settingsurl, get_string('connect_cancelled', 'mod_coassemble'), null, \core\output\notification::NOTIFY_INFO);
 }
 if ($error !== '') {
     redirect($settingsurl, get_string('connect_error_failed', 'mod_coassemble'), null, \core\output\notification::NOTIFY_ERROR);

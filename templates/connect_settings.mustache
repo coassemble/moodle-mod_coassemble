@@ -28,7 +28,8 @@
     * button - Connect or Reconnect label
     * hint - Text beside the button
     * starturl - Connect start page
-    * canconnect - Whether this site is served over https
+    * canconnect - Whether this site and the API base URL are https
+    * notice - Why Connect is unavailable (when canconnect is false)
     * connected - Whether Connect set the current API key
     * intro - Explanation (not connected)
     * summary - Plan and key mode line (connected)
@@ -55,9 +56,7 @@
     {{#summary}}<p class="mb-1">{{summary}}</p>{{/summary}}
     {{#connectedby}}<p class="text-muted">{{connectedby}}</p>{{/connectedby}}
     {{#unavailable}}<p class="text-muted">{{unavailable}}</p>{{/unavailable}}
-    {{^canconnect}}
-        <div class="alert alert-warning">{{#str}}connect_error_https, mod_coassemble{{/str}}</div>
-    {{/canconnect}}
+    {{#notice}}<div class="alert alert-warning">{{notice}}</div>{{/notice}}
     <div class="coassemble-connect-action">
         {{! Pressing Enter in a settings field clicks the form's first submit button. This one keeps that a save. }}
         <button type="submit" class="d-none" tabindex="-1" aria-hidden="true"></button>

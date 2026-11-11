@@ -106,6 +106,15 @@ class connect {
     }
 
     /**
+     * The API key travels from the token endpoint, so the API URL must be https.
+     *
+     * @return bool
+     */
+    public function api_is_https(): bool {
+        return self::https_origin($this->apiurl) !== null;
+    }
+
+    /**
      * The public client ID metadata document.
      *
      * @return array
@@ -138,15 +147,18 @@ class connect {
      * Begin an attempt and return the Coassemble authorization URL.
      *
      * Starting again replaces any earlier attempt in this session, so only the
-     * latest one can complete.
+     * latest one can complete, and only for the administrator who started it.
      *
      * @return \moodle_url
      */
     public function start(): \moodle_url {
-        global $SESSION;
+        global $SESSION, $USER;
 
         if (!self::site_is_https()) {
             throw new \moodle_exception('connect_error_https', 'mod_coassemble');
+        }
+        if (!$this->api_is_https()) {
+            throw new \moodle_exception('connect_error_apiurl_https', 'mod_coassemble');
         }
         $metadata = $this->discover();
 
@@ -156,6 +168,7 @@ class connect {
             'state' => $state,
             'verifier' => $verifier,
             'tokenendpoint' => $metadata['token_endpoint'],
+            'userid' => (int) $USER->id,
             'time' => time(),
         ];
 
@@ -174,23 +187,28 @@ class connect {
     /**
      * Take the pending attempt if the returned state matches it.
      *
-     * Any return clears the attempt, matching or not, so a state is usable once.
+     * The attempt is cleared only once the state matches, so a forged return
+     * can't cancel a genuine attempt. A matched state is usable once.
      *
      * @param string $state State returned by Coassemble
-     * @return array|null The attempt, or null when the state is wrong, reused or expired
+     * @return array|null The attempt, or null when the state is wrong, reused, expired
+     *     or was started by another user
      */
     public static function consume_state(string $state): ?array {
-        global $SESSION;
+        global $SESSION, $USER;
 
         $pending = $SESSION->{self::SESSION_KEY} ?? null;
-        unset($SESSION->{self::SESSION_KEY});
-
         if (!is_array($pending) || empty($pending['state']) || $state === '') {
             return null;
         }
         if (!hash_equals((string) $pending['state'], $state)) {
             return null;
         }
+        if (empty($USER->id) || (int) ($pending['userid'] ?? 0) !== (int) $USER->id) {
+            return null;
+        }
+
+        unset($SESSION->{self::SESSION_KEY});
         if ((int) ($pending['time'] ?? 0) < time() - self::ATTEMPT_TTL) {
             return null;
         }
@@ -273,8 +291,10 @@ class connect {
             diagnostics::log($e, 'connect_details');
         }
 
-        // Failures are reused too, so an unreachable API does not slow every page view.
-        $SESSION->{$cachekey} = ['keyhash' => $keyhash, 'time' => time(), 'details' => $details];
+        // Only successes are reused, so reloading after a failure tries again.
+        if ($details !== null) {
+            $SESSION->{$cachekey} = ['keyhash' => $keyhash, 'time' => time(), 'details' => $details];
+        }
         return $details;
     }
 
@@ -294,12 +314,16 @@ class connect {
     /**
      * Fetch the authorization server metadata from the configured API URL.
      *
+     * The metadata must name the API URL's origin as its issuer, and both
+     * endpoints must be on that origin, so the code and verifier only ever go
+     * to the configured API. The Connect resource is the app, which may be a
+     * different origin.
+     *
      * @return array authorization_endpoint, token_endpoint, coassemble_connect_resource
      */
     protected function discover(): array {
-        $curl = $this->create_curl();
+        $curl = $this->transport();
         $curl->setHeader(['Accept: application/json']);
-        $curl->setopt(['CURLOPT_TIMEOUT' => 30, 'CURLOPT_CONNECTTIMEOUT' => 15]);
         $response = $curl->get($this->apiurl . '/.well-known/oauth-authorization-server');
 
         $info = $curl->get_info();
@@ -308,11 +332,21 @@ class connect {
         $metadata = json_decode((string) $response, true);
 
         $valid = !$errno && $httpcode >= 200 && $httpcode < 300 && is_array($metadata);
-        foreach (['authorization_endpoint', 'token_endpoint', 'coassemble_connect_resource'] as $field) {
-            if (!$valid || !is_string($metadata[$field] ?? null) || strpos($metadata[$field], 'https://') !== 0) {
+        foreach (['issuer', 'authorization_endpoint', 'token_endpoint', 'coassemble_connect_resource'] as $field) {
+            if (!$valid || !is_string($metadata[$field] ?? null) || self::https_origin($metadata[$field]) === null) {
                 $valid = false;
                 break;
             }
+        }
+        if ($valid) {
+            $origin = self::https_origin($this->apiurl);
+            $issuerpath = (string) parse_url($metadata['issuer'], PHP_URL_PATH);
+            $valid = $origin !== null
+                && self::https_origin($metadata['issuer']) === $origin
+                && ($issuerpath === '' || $issuerpath === '/')
+                && parse_url($metadata['issuer'], PHP_URL_QUERY) === null
+                && self::https_origin($metadata['authorization_endpoint']) === $origin
+                && self::https_origin($metadata['token_endpoint']) === $origin;
         }
         if (!$valid) {
             diagnostics::record('connect_discovery', '', $httpcode, $errno);
@@ -329,12 +363,11 @@ class connect {
      * @return array apikey, workspace
      */
     protected function exchange_code(array $pending, string $code): array {
-        $curl = $this->create_curl();
+        $curl = $this->transport();
         $curl->setHeader([
             'Accept: application/json',
             'Content-Type: application/x-www-form-urlencoded',
         ]);
-        $curl->setopt(['CURLOPT_TIMEOUT' => 30, 'CURLOPT_CONNECTTIMEOUT' => 15]);
         $response = $curl->post((string) $pending['tokenendpoint'], http_build_query([
             'grant_type' => 'authorization_code',
             'code' => $code,
@@ -372,6 +405,46 @@ class connect {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
         return new \curl();
+    }
+
+    /**
+     * HTTP transport for discovery and the token exchange.
+     *
+     * Moodle's \curl does not verify peers by default and follows redirects;
+     * both are turned off here. The CA bundle stays Moodle's own (CURLOPT_CAINFO).
+     *
+     * @return \curl
+     */
+    protected function transport(): \curl {
+        $curl = $this->create_curl();
+        $curl->setopt([
+            'CURLOPT_SSL_VERIFYPEER' => true,
+            'CURLOPT_SSL_VERIFYHOST' => 2,
+            'CURLOPT_FOLLOWLOCATION' => false,
+            'CURLOPT_MAXREDIRS' => 0,
+            'CURLOPT_TIMEOUT' => 30,
+            'CURLOPT_CONNECTTIMEOUT' => 15,
+        ]);
+        return $curl;
+    }
+
+    /**
+     * Origin of an absolute https URL, with the default port made explicit.
+     *
+     * @param string $url
+     * @return string|null scheme://host:port, or null unless $url is https with a host and
+     *     no user info, fragment, whitespace or backslash
+     */
+    private static function https_origin(string $url): ?string {
+        if (preg_match('/[\s\\\\]/', $url)) {
+            return null;
+        }
+        $parts = parse_url($url);
+        if (!is_array($parts) || strtolower($parts['scheme'] ?? '') !== 'https' || empty($parts['host'])
+                || isset($parts['user']) || isset($parts['pass']) || isset($parts['fragment'])) {
+            return null;
+        }
+        return 'https://' . strtolower($parts['host']) . ':' . (int) ($parts['port'] ?? 443);
     }
 
     /**

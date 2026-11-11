@@ -49,6 +49,7 @@ $string['connect_button_hint'] = 'Opens Coassemble in this window, then brings y
 $string['connect_cancelled'] = 'Connect was cancelled in Coassemble, so nothing has changed.';
 $string['connect_connectedby'] = 'Connected by {$a->name} on {$a->date} · key “{$a->key}”';
 $string['connect_details_unavailable'] = 'Connection details couldn\'t be loaded from Coassemble just now. Reload this page to try again.';
+$string['connect_error_apiurl_https'] = 'Connect needs the API base URL to start with https://, because the API key is sent from there. Update the API base URL below, or paste an API key instead.';
 $string['connect_error_discovery'] = 'Coassemble\'s sign-in server couldn\'t be found at the API base URL ({$a}). Check the API base URL setting, then try again.';
 $string['connect_error_failed'] = 'Connect couldn\'t finish, so the API key hasn\'t changed. Try connecting again.';
 $string['connect_error_https'] = 'Connect needs this site to be served over https, because Coassemble only returns to secure addresses. Paste an API key below instead.';

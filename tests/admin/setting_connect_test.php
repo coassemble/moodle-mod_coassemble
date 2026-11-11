@@ -124,12 +124,38 @@ final class setting_connect_test extends \advanced_testcase {
         $this->redirectEvents();
         $this->connect_key();
         $client = $this->client();
-        $client->method('get_connection')->willThrowException(new \moodle_exception('error_apirequest', 'mod_coassemble'));
+        // Failures aren't reused, so reloading the page tries again.
+        $client->expects($this->exactly(2))->method('get_connection')
+            ->willThrowException(new \moodle_exception('error_apirequest', 'mod_coassemble'));
 
         $context = setting_connect::export_context($client);
         $this->assertTrue($context['connected']);
         $this->assertSame('Connected to Acme Learning', $context['heading']);
         $this->assertSame(get_string('connect_details_unavailable', 'mod_coassemble'), $context['unavailable']);
         $this->assertArrayNotHasKey('summary', $context);
+        setting_connect::export_context($client);
+    }
+
+    /**
+     * Connect is offered only when the site and the API base URL are both https.
+     */
+    public function test_connect_needs_https(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        $CFG->wwwroot = 'https://moodle.example.com';
+        set_config('apiurl', 'https://api.example.com', 'mod_coassemble');
+        $context = setting_connect::export_context($this->client());
+        $this->assertTrue($context['canconnect']);
+        $this->assertArrayNotHasKey('notice', $context);
+
+        set_config('apiurl', 'http://api.example.com', 'mod_coassemble');
+        $context = setting_connect::export_context($this->client());
+        $this->assertFalse($context['canconnect']);
+        $this->assertSame(get_string('connect_error_apiurl_https', 'mod_coassemble'), $context['notice']);
+
+        $CFG->wwwroot = 'http://moodle.example.com';
+        $context = setting_connect::export_context($this->client());
+        $this->assertFalse($context['canconnect']);
+        $this->assertSame(get_string('connect_error_https', 'mod_coassemble'), $context['notice']);
     }
 }

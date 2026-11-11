@@ -36,7 +36,7 @@ Data sent to Coassemble when users interact with an activity:
 - On return, the Moodle server exchanges the one-time code for an API key directly with Coassemble. The key is stored as the plugin's API key setting and never appears in a URL, notification or log.
 - The plugin settings page then reads the workspace, plan, key mode and connection details for the stored key from `/api/v1/headless/connection`.
 
-Connect needs the site to be served over https. Sites that can't use it paste a key from the Coassemble developer console instead.
+Connect needs the site and the API base URL to be https. Sites that can't use it paste a key from the Coassemble developer console instead.
 
 Data received from Coassemble: course metadata (titles, publish state), learner progress/completion/score tracking, and signed embed URLs. Progress data is mirrored into the plugin's tables to drive Moodle grades and activity completion, and is covered by the Moodle Privacy API (export and deletion). See Coassemble's [privacy policy](https://coassemble.com/privacy-policy) for how the service handles data.
 
@@ -153,7 +153,8 @@ site; they cannot detect references from another site or the Coassemble web app.
 - Fresh signed embed URLs are minted per page load; do not cache across users.
 - postMessage handlers check `event.origin` and `event.source`.
 - Webhook signatures use HMAC SHA-256 over `{timestamp}.{raw_body}`.
-- Connect starts only from a POST with sesskey by a site administrator. Its state is single-use and tied to the administrator's session, and the code exchange is protected by PKCE (S256).
+- Connect starts only from a POST with sesskey by a site administrator. Its state is single-use, tied to the administrator's session and user account, and the code exchange is protected by PKCE (S256).
+- Connect only trusts sign-in server metadata whose `issuer` is the API base URL's origin, with the authorization and token endpoints on that same origin. Discovery and the token exchange verify TLS certificates and don't follow redirects.
 
 ## Docs in this package
 

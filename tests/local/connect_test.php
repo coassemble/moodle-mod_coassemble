@@ -55,21 +55,25 @@ final class connect_test extends \advanced_testcase {
      * A connect instance whose HTTP transport is the given double.
      *
      * @param \curl $curl
+     * @param string $apiurl
      * @return connect
      */
-    private function connect_with(\curl $curl): connect {
-        $connect = $this->getMockBuilder(connect::class)->setConstructorArgs(['https://api.example.com'])
+    private function connect_with(\curl $curl, string $apiurl = 'https://api.example.com'): connect {
+        $connect = $this->getMockBuilder(connect::class)->setConstructorArgs([$apiurl])
             ->onlyMethods(['create_curl'])->getMock();
         $connect->method('create_curl')->willReturn($curl);
         return $connect;
     }
 
     /**
-     * Start an attempt against the fake discovery document.
+     * Start an attempt against the fake discovery document, as the admin unless someone is logged in.
      *
      * @return \moodle_url Authorization URL
      */
     private function start(): \moodle_url {
+        if (!isloggedin()) {
+            $this->setAdminUser();
+        }
         $curl = $this->mock_curl();
         $curl->expects($this->once())->method('get')
             ->with('https://api.example.com/.well-known/oauth-authorization-server')
@@ -147,6 +151,161 @@ final class connect_test extends \advanced_testcase {
     }
 
     /**
+     * Connect refuses to start when the API base URL is not https.
+     */
+    public function test_start_requires_https_apiurl(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $curl = $this->mock_curl();
+        $curl->expects($this->never())->method('get');
+
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('connect_error_apiurl_https', 'mod_coassemble'));
+        $this->connect_with($curl, 'http://api.example.com')->start();
+    }
+
+    /**
+     * Metadata that would send the code or verifier anywhere but the configured API.
+     *
+     * @return array
+     */
+    public static function untrusted_metadata_provider(): array {
+        $other = function (array $changes): array {
+            return [array_filter(array_merge(self::METADATA, $changes), fn($value) => $value !== null), 200];
+        };
+        return [
+            'missing issuer' => $other(['issuer' => null]),
+            'issuer on another host' => $other(['issuer' => 'https://evil.example.com']),
+            'issuer on another port' => $other(['issuer' => 'https://api.example.com:8443']),
+            'issuer over http' => $other(['issuer' => 'http://api.example.com']),
+            'issuer with a path' => $other(['issuer' => 'https://api.example.com/tenant']),
+            'authorization endpoint on another host' => $other([
+                'authorization_endpoint' => 'https://evil.example.com/oauth/authorize',
+            ]),
+            'token endpoint on another host' => $other(['token_endpoint' => 'https://evil.example.com/oauth/token']),
+            'token endpoint on another port' => $other(['token_endpoint' => 'https://api.example.com:8443/oauth/token']),
+            'token endpoint lookalike host' => $other(['token_endpoint' => 'https://api.example.com.evil.example/oauth/token']),
+            'token endpoint with user info' => $other(['token_endpoint' => 'https://api.example.com@evil.example.com/oauth/token']),
+            'token endpoint over http' => $other(['token_endpoint' => 'http://api.example.com/oauth/token']),
+            'connect resource over http' => $other(['coassemble_connect_resource' => 'http://app.example.com/api/connect']),
+            'redirect response' => [[], 302],
+        ];
+    }
+
+    /**
+     * Untrusted discovery is refused before any attempt is stored.
+     *
+     * @dataProvider untrusted_metadata_provider
+     * @param array $metadata
+     * @param int $httpcode
+     */
+    public function test_start_rejects_untrusted_metadata(array $metadata, int $httpcode): void {
+        global $SESSION;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $this->redirectEvents();
+        $curl = $this->mock_curl();
+        $curl->method('get')->willReturn($metadata ? json_encode($metadata) : '');
+        $curl->method('get_info')->willReturn(['http_code' => $httpcode]);
+
+        try {
+            $this->connect_with($curl)->start();
+            $this->fail('Untrusted metadata must be refused');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('connect_error_discovery', $e->errorcode);
+        }
+        $this->assertFalse(isset($SESSION->{connect::SESSION_KEY}));
+    }
+
+    /**
+     * The issuer may differ from the API URL only by a trailing slash or an explicit default port.
+     */
+    public function test_start_accepts_equivalent_issuer(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        foreach (['https://api.example.com/', 'https://API.example.com:443'] as $issuer) {
+            $curl = $this->mock_curl();
+            $curl->method('get')->willReturn(json_encode(['issuer' => $issuer] + self::METADATA));
+            $curl->method('get_info')->willReturn(['http_code' => 200]);
+            $url = $this->connect_with($curl, 'https://api.example.com/')->start();
+            $this->assertSame('https://api.example.com/oauth/authorize', $url->out_omit_querystring());
+        }
+    }
+
+    /**
+     * Discovery and the token exchange verify TLS and never follow redirects.
+     */
+    public function test_transport_verifies_tls_without_redirects(): void {
+        global $SESSION;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $expected = [
+            'CURLOPT_SSL_VERIFYPEER' => true,
+            'CURLOPT_SSL_VERIFYHOST' => 2,
+            'CURLOPT_FOLLOWLOCATION' => false,
+            'CURLOPT_MAXREDIRS' => 0,
+        ];
+
+        $options = [];
+        $curl = $this->mock_curl();
+        $curl->method('setopt')->willReturnCallback(function ($set) use (&$options) {
+            $options = array_merge($options, $set);
+        });
+        $curl->method('get')->willReturn(json_encode(self::METADATA));
+        $curl->method('get_info')->willReturn(['http_code' => 200]);
+        $this->connect_with($curl)->start();
+        foreach ($expected as $name => $value) {
+            $this->assertSame($value, $options[$name], 'discovery ' . $name);
+        }
+
+        $pending = connect::consume_state($SESSION->{connect::SESSION_KEY}['state']);
+        $options = [];
+        $curl = $this->mock_curl();
+        $curl->method('setopt')->willReturnCallback(function ($set) use (&$options) {
+            $options = array_merge($options, $set);
+        });
+        $curl->method('post')->willReturn(json_encode(['api_key' => self::ISSUED_KEY]));
+        $curl->method('get_info')->willReturn(['http_code' => 200]);
+        $this->connect_with($curl)->complete($pending, 'one-time-code');
+        foreach ($expected as $name => $value) {
+            $this->assertSame($value, $options[$name], 'token ' . $name);
+        }
+
+        // On Moodle's own \curl, the CA bundle Moodle chose is kept.
+        $method = new \ReflectionMethod(connect::class, 'transport');
+        $method->setAccessible(true);
+        $real = $method->invoke(new connect('https://api.example.com'));
+        $property = new \ReflectionProperty(\curl::class, 'options');
+        $property->setAccessible(true);
+        $options = $property->getValue($real);
+        foreach ($expected as $name => $value) {
+            $this->assertSame($value, $options[$name], 'real ' . $name);
+        }
+        $cacert = \curl::get_cacert();
+        if ($cacert) {
+            $this->assertSame($cacert, $options['CURLOPT_CAINFO']);
+        }
+    }
+
+    /**
+     * A redirect from the token endpoint is a failure, not something to follow.
+     */
+    public function test_complete_rejects_redirect(): void {
+        global $SESSION;
+        $this->resetAfterTest();
+        $this->redirectEvents();
+        $this->start();
+        $pending = connect::consume_state($SESSION->{connect::SESSION_KEY}['state']);
+
+        $curl = $this->mock_curl();
+        $curl->expects($this->once())->method('post')->willReturn('');
+        $curl->method('get_info')->willReturn(['http_code' => 307]);
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(get_string('connect_error_failed', 'mod_coassemble'));
+        $this->connect_with($curl)->complete($pending, 'one-time-code');
+    }
+
+    /**
      * The authorization URL carries the PKCE challenge and no API key.
      */
     public function test_start_authorization_url(): void {
@@ -182,13 +341,13 @@ final class connect_test extends \advanced_testcase {
         global $SESSION;
         $this->resetAfterTest();
 
-        // Missing state.
+        // Missing or wrong state is refused, and leaves the genuine attempt usable.
         $this->start();
+        $state = $SESSION->{connect::SESSION_KEY}['state'];
         $this->assertNull(connect::consume_state(''));
-
-        // Wrong state.
-        $this->start();
         $this->assertNull(connect::consume_state('not-the-state'));
+        $this->assertNull(connect::consume_state(substr($state, 0, -1)));
+        $this->assertIsArray(connect::consume_state($state));
 
         // An earlier attempt is replaced by a later one.
         $this->start();
@@ -211,7 +370,7 @@ final class connect_test extends \advanced_testcase {
     }
 
     /**
-     * An attempt left too long is refused.
+     * An attempt left too long is refused, and cleared.
      */
     public function test_state_expires(): void {
         global $SESSION;
@@ -220,6 +379,31 @@ final class connect_test extends \advanced_testcase {
         $state = $SESSION->{connect::SESSION_KEY}['state'];
         $SESSION->{connect::SESSION_KEY}['time'] = time() - connect::ATTEMPT_TTL - 1;
         $this->assertNull(connect::consume_state($state));
+        $this->assertFalse(isset($SESSION->{connect::SESSION_KEY}));
+    }
+
+    /**
+     * Only the administrator who started an attempt can complete it.
+     */
+    public function test_state_bound_to_user(): void {
+        global $SESSION;
+        $this->resetAfterTest();
+        $starter = $this->getDataGenerator()->create_user();
+        $other = $this->getDataGenerator()->create_user();
+
+        $this->setUser($starter);
+        $this->start();
+        $state = $SESSION->{connect::SESSION_KEY}['state'];
+        $this->assertSame((int) $starter->id, $SESSION->{connect::SESSION_KEY}['userid']);
+
+        // Same session data, different user: refused, and the attempt survives.
+        $this->setUser($other);
+        $this->assertNull(connect::consume_state($state));
+        $this->setUser(null);
+        $this->assertNull(connect::consume_state($state));
+
+        $this->setUser($starter);
+        $this->assertIsArray(connect::consume_state($state));
     }
 
     /**

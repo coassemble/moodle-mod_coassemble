@@ -91,9 +91,16 @@ class setting_connect extends \admin_setting {
     public static function export_context(?\mod_coassemble\api\client $client = null): array {
         $context = [
             'starturl' => (new \moodle_url('/mod/coassemble/connect/start.php'))->out(false),
-            'canconnect' => connect::site_is_https(),
+            'canconnect' => true,
             'connected' => false,
         ];
+        if (!connect::site_is_https()) {
+            $context['canconnect'] = false;
+            $context['notice'] = get_string('connect_error_https', 'mod_coassemble');
+        } else if (!(new connect())->api_is_https()) {
+            $context['canconnect'] = false;
+            $context['notice'] = get_string('connect_error_apiurl_https', 'mod_coassemble');
+        }
 
         if (!connect::is_connected()) {
             $context['heading'] = get_string('connect_heading', 'mod_coassemble');
