@@ -381,6 +381,16 @@ class client {
     }
 
     /**
+     * Workspace, plan, key and connection details for this API key.
+     *
+     * @return array {workspace, plan, key, connection}
+     */
+    public function get_connection() {
+        $result = $this->request('GET', self::API_BASE . '/connection');
+        return is_array($result) ? $result : [];
+    }
+
+    /**
      * List themes.
      *
      * @return array

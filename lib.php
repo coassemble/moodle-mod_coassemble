@@ -151,10 +151,24 @@ function coassemble_coursemodule_edit_post_actions(stdClass $moduleinfo, stdClas
  * Failures are reported as notifications but never block saving settings —
  * progress still syncs via the player without webhooks.
  *
+ * @param string $name Full setting name (passed by the admin settings API)
+ * @param bool $connected Whether Connect Coassemble just set the key
  * @return void
  */
-function mod_coassemble_credentials_updated() {
+function mod_coassemble_credentials_updated($name = '', bool $connected = false) {
+    if (!$connected) {
+        // A key pasted over a Connect key is no longer "set by Connect".
+        \mod_coassemble\local\connect::forget_if_key_replaced();
+    }
+
     $result = \mod_coassemble\local\webhook_registration::ensure(true);
+    if ($connected) {
+        $registered = $result['status'] === \mod_coassemble\local\webhook_registration::STATUS_REGISTERED;
+        \core\notification::success(get_string($registered ? 'connect_success' : 'connect_success_nowebhooks', 'mod_coassemble'));
+        if ($registered) {
+            return;
+        }
+    }
     switch ($result['status']) {
         case \mod_coassemble\local\webhook_registration::STATUS_REGISTERED:
             \core\notification::success(get_string('webhook_auto_ok', 'mod_coassemble'));
