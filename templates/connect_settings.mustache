@@ -1,0 +1,72 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_coassemble/connect_settings
+
+    Connect to Coassemble section of the plugin settings page.
+
+    The button submits the surrounding admin settings form (which carries the
+    sesskey) to the Connect start page, so no nested form is needed.
+    The start page ignores the other settings fields.
+
+    Context variables required for this template:
+    * heading - Section heading
+    * button - Connect or Reconnect label
+    * hint - Text beside the button
+    * starturl - Connect start page
+    * canconnect - Whether this site is served over https
+    * connected - Whether Connect set the current API key
+    * intro - Explanation (not connected)
+    * summary - Plan and key mode line (connected)
+    * connectedby - Who connected, when, and the key name (connected)
+    * unavailable - Shown when connection details could not be loaded
+    * manageurl - Developer console API keys list (connected)
+
+    Example context (json):
+    {
+        "heading": "Connected to Example workspace",
+        "button": "Reconnect",
+        "hint": "Moved to a paid plan, or need a different workspace? Reconnect to switch.",
+        "starturl": "https://moodle.example.com/mod/coassemble/connect/start.php",
+        "canconnect": true,
+        "connected": true,
+        "summary": "Sandbox workspace · test key · learners see a Test mode badge",
+        "connectedby": "Connected by Sam Lee on 11 November 2026 · key “Moodle: moodle.example.com”",
+        "manageurl": "https://coassemble.com/dashboard/developer?tab=api-keys"
+    }
+}}
+<div class="coassemble-connect mb-4">
+    <h3 class="main">{{heading}}</h3>
+    {{#intro}}<p>{{intro}}</p>{{/intro}}
+    {{#summary}}<p class="mb-1">{{summary}}</p>{{/summary}}
+    {{#connectedby}}<p class="text-muted">{{connectedby}}</p>{{/connectedby}}
+    {{#unavailable}}<p class="text-muted">{{unavailable}}</p>{{/unavailable}}
+    {{^canconnect}}
+        <div class="alert alert-warning">{{#str}}connect_error_https, mod_coassemble{{/str}}</div>
+    {{/canconnect}}
+    <div class="coassemble-connect-action">
+        {{! Pressing Enter in a settings field clicks the form's first submit button. This one keeps that a save. }}
+        <button type="submit" class="d-none" tabindex="-1" aria-hidden="true"></button>
+        <button type="submit" class="btn {{#connected}}btn-secondary{{/connected}}{{^connected}}btn-primary{{/connected}}"
+            formaction="{{starturl}}" formmethod="post" formnovalidate aria-describedby="{{uniqid}}-connect-hint"
+            {{^canconnect}}disabled{{/canconnect}}>{{button}}</button>
+        <span class="text-muted" id="{{uniqid}}-connect-hint">{{hint}}</span>
+    </div>
+    {{#manageurl}}
+        <p class="mt-3"><a href="{{manageurl}}" target="_blank" rel="noopener noreferrer">{{#str}}connect_manage, mod_coassemble{{/str}}</a></p>
+    {{/manageurl}}
+</div>

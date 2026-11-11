@@ -29,6 +29,15 @@ Data sent to Coassemble when users interact with an activity:
 - For **authoring sessions only** (`action: edit`), the author's display name and profile picture URL for in-session presence. Learner course and collection views omit both fields.
 - A **tenant identifier** derived from this Moodle site (one Coassemble tenant per site).
 
+**Connect Coassemble** (optional, administrators only) sets up the API key without copying it:
+
+- The **Connect Coassemble** button sends the administrator's browser to Coassemble's sign-in server (discovered from the API base URL at `/.well-known/oauth-authorization-server`) to sign in, or create an account, and approve the site. The request carries this site's client ID, return address and a one-time PKCE challenge; no Moodle user data is sent.
+- Coassemble's server fetches this site's public client metadata document at `/mod/coassemble/connect/client.php`. It contains the site's full name, its address and the Connect return address.
+- On return, the Moodle server exchanges the one-time code for an API key directly with Coassemble. The key is stored as the plugin's API key setting and never appears in a URL, notification or log.
+- The plugin settings page then reads the workspace, plan, key mode and connection details for the stored key from `/api/v1/headless/connection`.
+
+Connect needs the site to be served over https. Sites that can't use it paste a key from the Coassemble developer console instead.
+
 Data received from Coassemble: course metadata (titles, publish state), learner progress/completion/score tracking, and signed embed URLs. Progress data is mirrored into the plugin's tables to drive Moodle grades and activity completion, and is covered by the Moodle Privacy API (export and deletion). See Coassemble's [privacy policy](https://coassemble.com/privacy-policy) for how the service handles data.
 
 Removing learner profile fields applies to future embed requests. It does not
@@ -73,7 +82,9 @@ Install from a release ZIP via **Site administration → Plugins → Install plu
 or place this repository's contents in a `mod/coassemble` folder under your Moodle
 root and complete the upgrade at **Site administration → Notifications**.
 
-Configure **Site administration → Plugins → Activity modules → Coassemble**, then run **Test connection** (list + authoring probe).
+Configure **Site administration → Plugins → Activity modules → Coassemble**: choose **Connect Coassemble**, or paste an API key, then run **Test connection** (list + authoring probe).
+
+On a dedicated Coassemble server, set **API base URL** to the server's API address and **Coassemble app URL** to its app address (default `https://coassemble.com`). The app URL is only used for the **Manage this connection in Coassemble** link to the developer console.
 
 ## Teacher flow (core)
 
@@ -142,6 +153,7 @@ site; they cannot detect references from another site or the Coassemble web app.
 - Fresh signed embed URLs are minted per page load; do not cache across users.
 - postMessage handlers check `event.origin` and `event.source`.
 - Webhook signatures use HMAC SHA-256 over `{timestamp}.{raw_body}`.
+- Connect starts only from a POST with sesskey by a site administrator. Its state is single-use and tied to the administrator's session, and the code exchange is protected by PKCE (S256).
 
 ## Docs in this package
 

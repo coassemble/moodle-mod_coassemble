@@ -28,6 +28,9 @@ if ($ADMIN->fulltree) {
     // The apikey updated-callback (webhook auto-registration) lives in lib.php.
     require_once($CFG->dirroot . '/mod/coassemble/lib.php');
 
+    // Connect Coassemble sets the API key below through a sign-in handshake.
+    $settings->add(new \mod_coassemble\admin\setting_connect());
+
     $settings->add(new admin_setting_heading(
         'mod_coassemble/credentials',
         get_string('settings_credentials', 'mod_coassemble'),
@@ -42,12 +45,23 @@ if ($ADMIN->fulltree) {
         PARAM_URL
     ));
 
+    $settings->add(new admin_setting_configtext(
+        'mod_coassemble/appurl',
+        get_string('settings_appurl', 'mod_coassemble'),
+        get_string('settings_appurl_desc', 'mod_coassemble'),
+        \mod_coassemble\local\connect::DEFAULT_APPURL,
+        PARAM_URL
+    ));
+
     // Saving credentials auto-registers this site's webhook receiver with
     // Coassemble (no manual webhook configuration).
     $apikeysetting = new admin_setting_configpasswordunmask(
         'mod_coassemble/apikey',
         get_string('settings_apikey', 'mod_coassemble'),
-        get_string('settings_apikey_desc', 'mod_coassemble'),
+        get_string(
+            \mod_coassemble\local\connect::is_connected() ? 'settings_apikey_desc_connect' : 'settings_apikey_desc',
+            'mod_coassemble'
+        ),
         ''
     );
     $apikeysetting->set_updatedcallback('mod_coassemble_credentials_updated');
