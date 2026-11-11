@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.5.0 — 2026-11-11
+
+### Added
+- Connect Coassemble: site administrators connect the site to a Coassemble
+  workspace from the plugin settings by signing in, or creating a free account,
+  and approving the site. The plugin saves the API key and registers progress
+  webhooks itself, so there's no key to copy. Requires https for both the site
+  and the API base URL.
+- The settings page shows the connected workspace, plan, key mode (with a note
+  when learners see the Test mode badge), who connected and when, and the key
+  name, with Reconnect to switch workspace or pick up a new plan.
+- Manage this connection in Coassemble links to the developer console API keys.
+  A new Coassemble app URL setting points it at a dedicated server.
+
+### Changed
+- Pasting an API key from the developer console remains available as a fallback.
+
 ## 1.4.2 — 2026-10-27
 
 ### Changed

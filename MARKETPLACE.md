@@ -10,14 +10,22 @@ The Coassemble plug-in requires a commercial subscription to Coassemble, with av
 The plugin is free to install; a Coassemble subscription is not included.
 API access and authoring entitlement are required.
 
+Want to try it first? [Create a free Coassemble sandbox](https://coassemble.com/signin?channel=moodle)
+and connect it to your Moodle site.
+
 Requires Moodle 4.1–5.3 and a PHP version supported by your Moodle release.
-Use a maintained Moodle release for new installations. Configure your workspace
-credentials under Site administration → Plugins → Activity modules → Coassemble,
-then run the connection test. HTTPS is required for webhook registration.
+Use a maintained Moodle release for new installations. Under Site administration
+→ Plugins → Activity modules → Coassemble, choose Connect Coassemble to sign in
+and approve the site (the plugin sets up its API key and progress updates
+itself), or paste an API key from the Coassemble developer console. Then run the
+connection test. HTTPS is required for Connect and for webhook registration.
 
 The service receives a pseudonymous user identifier, display name, learner
 profile picture URL, and site tenant identifier. It returns signed embed URLs,
-course metadata and learner tracking. See the [external service disclosure](README.md#external-services-disclosure),
+course metadata and learner tracking. Connect sends the administrator to
+Coassemble to sign in and exchanges a one-time code for an API key; Coassemble
+fetches the site's public client metadata document (site name and address).
+See the [external service disclosure](README.md#external-services-disclosure),
 [installation guide](INSTALL.md), [privacy policy](https://coassemble.com/privacy-policy)
 and [support guide](SUPPORT.md).
 
