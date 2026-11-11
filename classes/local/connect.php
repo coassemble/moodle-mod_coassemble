@@ -440,8 +440,10 @@ class connect {
             return null;
         }
         $parts = parse_url($url);
-        if (!is_array($parts) || strtolower($parts['scheme'] ?? '') !== 'https' || empty($parts['host'])
-                || isset($parts['user']) || isset($parts['pass']) || isset($parts['fragment'])) {
+        if (
+            !is_array($parts) || strtolower($parts['scheme'] ?? '') !== 'https' || empty($parts['host'])
+            || isset($parts['user']) || isset($parts['pass']) || isset($parts['fragment'])
+        ) {
             return null;
         }
         return 'https://' . strtolower($parts['host']) . ':' . (int) ($parts['port'] ?? 443);

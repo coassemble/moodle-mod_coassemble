@@ -24,7 +24,7 @@
 
 require(__DIR__ . '/../../../config.php');
 
-\mod_coassemble\local\connect::require_admin();
+require_admin();
 \mod_coassemble\local\action::require_post();
 
 $PAGE->set_url('/mod/coassemble/connect/start.php');

@@ -30,7 +30,7 @@ require_once($CFG->dirroot . '/mod/coassemble/lib.php');
 
 use mod_coassemble\local\connect;
 
-connect::require_admin();
+require_admin();
 
 $PAGE->set_url('/mod/coassemble/connect/return.php');
 $PAGE->set_context(context_system::instance());

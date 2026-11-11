@@ -393,17 +393,25 @@ final class connect_test extends \advanced_testcase {
 
         $this->setUser($starter);
         $this->start();
-        $state = $SESSION->{connect::SESSION_KEY}['state'];
-        $this->assertSame((int) $starter->id, $SESSION->{connect::SESSION_KEY}['userid']);
+        $attempt = $SESSION->{connect::SESSION_KEY};
+        $state = $attempt['state'];
+        $this->assertSame((int) $starter->id, $attempt['userid']);
 
         // Same session data, different user: refused, and the attempt survives.
+        // setUser() may reset $SESSION in tests, so put the same attempt back each time.
         $this->setUser($other);
+        $SESSION->{connect::SESSION_KEY} = $attempt;
         $this->assertNull(connect::consume_state($state));
+        $this->assertSame($attempt, $SESSION->{connect::SESSION_KEY});
         $this->setUser(null);
+        $SESSION->{connect::SESSION_KEY} = $attempt;
         $this->assertNull(connect::consume_state($state));
+        $this->assertSame($attempt, $SESSION->{connect::SESSION_KEY});
 
         $this->setUser($starter);
+        $SESSION->{connect::SESSION_KEY} = $attempt;
         $this->assertIsArray(connect::consume_state($state));
+        $this->assertFalse(isset($SESSION->{connect::SESSION_KEY}));
     }
 
     /**
